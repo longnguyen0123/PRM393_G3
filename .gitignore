@@ -1,0 +1,39 @@
+# Node.js / Backend
+prm393_g3_backend/node_modules/
+prm393_g3_backend/package-lock.json
+prm393_g3_backend/.env
+*.env
+.env.local
+
+# Flutter / Frontend (đã có sẵn trong prm393_g3_frontend/.gitignore)
+prm393_g3_frontend/.dart_tool/
+prm393_g3_frontend/.flutter-plugins
+prm393_g3_frontend/.flutter-plugins-dependencies
+prm393_g3_frontend/.packages
+prm393_g3_frontend/build/
+prm393_g3_frontend/.pub-cache/
+prm393_g3_frontend/.pub/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
