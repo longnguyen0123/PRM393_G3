@@ -1,5 +1,10 @@
-import { getAllBranches } from '../repositories/branchRepository.js';
-import { getTotalStockByBranch } from '../repositories/inventoryRepository.js';
+import {
+  getAllBranches,
+  createBranch as createBranchRepository
+} from '../repositories/branchRepository.js';
+
+import { getTotalStockByBranch }
+  from '../repositories/inventoryRepository.js';
 
 export const getAllBranchesWithStock = async () => {
   const branches = await getAllBranches();
@@ -14,4 +19,8 @@ export const getAllBranchesWithStock = async () => {
     ...branch,
     totalItemsInStock: stockMap[branch._id] || 0
   }));
+};
+
+export const createBranch = async (data) => {
+  return await createBranchRepository(data);
 };

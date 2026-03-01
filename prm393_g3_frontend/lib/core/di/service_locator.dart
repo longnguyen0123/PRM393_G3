@@ -12,6 +12,7 @@ import '../../features/branches/data/repositories/branch_repository_impl.dart';
 import '../../features/branches/domain/repositories/branch_repository.dart';
 import '../../features/branches/domain/usecases/get_branch.dart';
 import '../../features/branches/presentation/bloc/branch_bloc.dart';
+import '../../features/branches/domain/usecases/create_branch.dart';
 
 // ===== Variant Feature Imports =====
 import '../../features/variants/data/datasources/variant_remote_data_source.dart';
@@ -58,13 +59,20 @@ Future<void> configureDependencies() async {
     ..registerFactory<ProductBloc>(() => ProductBloc(repository: getIt()));
 
   // ===== Branch Feature =====
-  getIt
-    ..registerLazySingleton(() => BranchRemoteDataSource(getIt()))
-    ..registerLazySingleton<BranchRepository>(
-      () => BranchRepositoryImpl(getIt()),
-    )
-    ..registerLazySingleton(() => GetBranches(getIt()))
-    ..registerFactory(() => BranchBloc(getIt()));
+
+  getIt.registerLazySingleton(() => BranchRemoteDataSource(getIt()));
+
+  getIt.registerLazySingleton<BranchRepository>(
+    () => BranchRepositoryImpl(getIt()),
+  );
+
+  getIt.registerLazySingleton(() => GetBranches(getIt()));
+
+  getIt.registerLazySingleton(() => CreateBranch(getIt()));
+
+  getIt.registerFactory(
+    () => BranchBloc(getBranches: getIt(), createBranch: getIt()),
+  );
 
   // ===== Variant Feature =====
   getIt
@@ -77,7 +85,9 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GetVariantsUseCase>(
       () => GetVariantsUseCase(repository: getIt()),
     )
-    ..registerFactory<VariantBloc>(() => VariantBloc(getVariantsUseCase: getIt()));
+    ..registerFactory<VariantBloc>(
+      () => VariantBloc(getVariantsUseCase: getIt()),
+    );
 
   // ===== Brand Feature =====
   getIt
@@ -103,5 +113,7 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GetCategoriesUseCase>(
       () => GetCategoriesUseCase(repository: getIt()),
     )
-    ..registerFactory<CategoryBloc>(() => CategoryBloc(getCategoriesUseCase: getIt()));
+    ..registerFactory<CategoryBloc>(
+      () => CategoryBloc(getCategoriesUseCase: getIt()),
+    );
 }

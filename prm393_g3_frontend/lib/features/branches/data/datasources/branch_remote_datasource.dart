@@ -7,10 +7,23 @@ class BranchRemoteDataSource {
   BranchRemoteDataSource(this.apiClient);
 
   Future<List<BranchModel>> getBranches() async {
-  final response = await apiClient.get('/branches');
+    final response = await apiClient.get('/branches');
 
-  final List data = response.data['data'];
+    final List data = response.data['data'];
 
-  return data.map((e) => BranchModel.fromJson(e)).toList();
-}
+    return data.map((e) => BranchModel.fromJson(e)).toList();
+  }
+
+  Future<BranchModel> createBranch({
+    required String name,
+    required String address,
+    required String status,
+  }) async {
+    final response = await apiClient.post(
+      '/branches',
+      data: {'name': name, 'address': address, 'status': status},
+    );
+
+    return BranchModel.fromJson(response.data['data']);
+  }
 }
