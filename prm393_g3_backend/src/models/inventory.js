@@ -1,13 +1,15 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const inventorySchema = new mongoose.Schema({
-  branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
-  variantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Variant', required: true },
-  quantity: { type: Number, required: true, default: 0 },
-  reorderLevel: { type: Number, default: 2 }
-}, { timestamps: true });
+const inventorySchema = new mongoose.Schema(
+  {
+    branchId: { type: String, required: true },
+    variantId: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    reorderLevel: { type: Number, required: true }
+  },
+  { timestamps: true }
+);
 
-// Đảm bảo không có việc trùng lặp 1 variant trong cùng 1 chi nhánh
-inventorySchema.index({ branchId: 1, variantId: 1 }, { unique: true });
+const Inventory = mongoose.model('Inventory', inventorySchema, 'Inventory');
 
-module.exports = mongoose.model('Inventory', inventorySchema);
+export default Inventory;

@@ -1,9 +1,14 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const branchSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  address: { type: String, required: true },
-  status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' }
-}, { timestamps: true }); // Tự động tạo createdAt và updatedAt
+const branchSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    address: { type: String, required: true },
+    status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' }
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Branch', branchSchema);
+const Branch = mongoose.model('Branch', branchSchema, 'Branch');
+
+export default Branch;

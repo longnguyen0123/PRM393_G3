@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prm393_g3_frontend/core/widgets/app_drawer.dart';
 import '../bloc/product_bloc.dart';
 import '../widgets/product_card.dart';
 
@@ -18,6 +19,7 @@ class ProductListPage extends StatelessWidget {
           ),
         ],
       ),
+      drawer: const AppDrawer(),
       body: BlocBuilder<ProductBloc, ProductState>(
         builder: (context, state) {
           switch (state.status) {
