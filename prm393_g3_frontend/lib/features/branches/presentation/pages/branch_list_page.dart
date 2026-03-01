@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/widgets/bottom_nav_bar.dart';
+import '../../../../core/widgets/app_drawer.dart';
 import '../bloc/branch_bloc.dart';
 import '../bloc/branch_event.dart';
 import '../bloc/branch_state.dart';
-import '../../../../core/widgets/app_drawer.dart';
 
 class BranchListPage extends StatelessWidget {
   const BranchListPage({super.key});
@@ -18,6 +19,7 @@ class BranchListPage extends StatelessWidget {
           title: const Text('Branches'),
         ),
         drawer: const AppDrawer(),
+        bottomNavigationBar: const BottomNavBar(currentIndex: 0),
         body: BlocBuilder<BranchBloc, BranchState>(
           builder: (context, state) {
             if (state is BranchLoading) {

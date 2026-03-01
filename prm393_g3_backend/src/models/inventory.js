@@ -10,6 +10,7 @@ const inventorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Inventory = mongoose.model('Inventory', inventorySchema, 'Inventory');
+// Map to collection 'inventory' (lowercase) in MongoDB
+const Inventory = mongoose.model('Inventory', inventorySchema, 'inventory');
 
 export default Inventory;

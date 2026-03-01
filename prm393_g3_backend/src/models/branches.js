@@ -9,6 +9,7 @@ const branchSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Branch = mongoose.model('Branch', branchSchema, 'Branch');
+// Map to collection 'branches' (lowercase, plural) in MongoDB
+const Branch = mongoose.model('Branch', branchSchema, 'branches');
 
 export default Branch;
