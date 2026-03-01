@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/products/presentation/pages/product_list_page.dart';
+import '../../features/categories/presentation/pages/category_list_page.dart';
+import '../../features/branches/presentation/pages/branch_list_page.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -20,11 +24,36 @@ class AppDrawer extends StatelessWidget {
           ),
 
           ListTile(
-            leading: const Icon(Icons.inventory),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const HomePage()),
+                (route) => false,
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.list),
             title: const Text('Products'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/');
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ProductListPage()),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.category),
+            title: const Text('Product Categories'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const CategoryListPage()),
+              );
             },
           ),
 
@@ -33,7 +62,9 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Branches'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/branches');
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const BranchListPage()),
+              );
             },
           ),
         ],

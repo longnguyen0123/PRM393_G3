@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prm393_g3_frontend/features/branches/presentation/pages/branch_list_page.dart';
 import 'core/di/service_locator.dart';
 import 'features/products/presentation/bloc/product_bloc.dart';
-import 'features/products/presentation/pages/product_list_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +23,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
           useMaterial3: true,
         ),
-        home: const ProductListPage(),
-        routes: {
-          '/branches': (_) => const BranchListPage(),
-        },
+        home: const HomePage(),
+        debugShowCheckedModeBanner: false,
       ),
     );
   }
