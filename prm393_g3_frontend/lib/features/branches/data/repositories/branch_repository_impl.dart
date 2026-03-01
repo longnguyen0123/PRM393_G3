@@ -11,4 +11,14 @@ class BranchRepositoryImpl implements BranchRepository {
   Future<List<Branch>> getBranches() async {
     return await remoteDataSource.getBranches();
   }
+
+  @override
+  Future<Branch> createBranch(Branch branch) async {
+    final model = await remoteDataSource.createBranch(
+      name: branch.name,
+      address: branch.address,
+      status: branch.status,
+    );
+    return model;
+  }
 }

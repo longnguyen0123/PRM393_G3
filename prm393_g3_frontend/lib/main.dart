@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prm393_g3_frontend/features/branches/presentation/pages/branch_list_page.dart';
+import 'package:prm393_g3_frontend/features/branches/presentation/pages/create_branch_page.dart';
 import 'core/di/service_locator.dart';
 import 'features/products/presentation/bloc/product_bloc.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -24,6 +26,10 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const HomePage(),
+        routes: {
+          '/branch-list': (_) => const BranchListPage(),
+          '/create-branch': (_) => const CreateBranchPage(),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );

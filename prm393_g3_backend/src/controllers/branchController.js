@@ -1,18 +1,30 @@
-import { getAllBranchesWithStock } from '../services/branchService.js';
+import {
+  getAllBranchesWithStock,
+  createBranch
+} from '../services/branchService.js';
 
-export const getBranches = async (req, res) => {
+export const getBranches = async (req, res, next) => {
   try {
     const branches = await getAllBranchesWithStock();
-
-    return res.status(200).json({
+    res.json({
       success: true,
       data: branches,
-      message: "Branches fetched successfully"
+      message: 'Branches fetched successfully'
     });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createBranchHandler = async (req, res, next) => {
+  try {
+    const branch = await createBranch(req.body);
+    res.status(201).json({
+      success: true,
+      data: branch,
+      message: 'Branch created successfully'
     });
+  } catch (err) {
+    next(err);
   }
 };
