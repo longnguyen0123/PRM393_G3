@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prm393_g3_frontend/core/di/service_locator.dart';
+import 'package:prm393_g3_frontend/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:prm393_g3_frontend/features/auth/presentation/pages/auth_wrapper.dart';
 import 'package:prm393_g3_frontend/features/branches/presentation/pages/branch_list_page.dart';
 import 'package:prm393_g3_frontend/features/branches/presentation/pages/create_branch_page.dart';
-import 'core/di/service_locator.dart';
-import 'features/products/presentation/bloc/product_bloc.dart';
-import 'features/home/presentation/pages/home_page.dart';
+import 'package:prm393_g3_frontend/features/home/presentation/pages/home_page.dart';
+import 'package:prm393_g3_frontend/features/products/presentation/bloc/product_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,16 +19,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<ProductBloc>()..add(const ProductRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(create: (_) => getIt<AuthBloc>()),
+        BlocProvider<ProductBloc>(
+          create: (_) => getIt<ProductBloc>()..add(const ProductRequested()),
+        ),
+      ],
       child: MaterialApp(
         title: 'Retail Chain Manager',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
           useMaterial3: true,
         ),
-        home: const HomePage(),
+        home: const AuthWrapper(),
         routes: {
+          '/home': (_) => const HomePage(),
           '/branch-list': (_) => const BranchListPage(),
           '/create-branch': (_) => const CreateBranchPage(),
         },
