@@ -1,5 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../storage/auth_storage.dart';
+import '../../features/auth/data/datasources/auth_remote_data_source.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/products/data/datasources/product_remote_data_source.dart';
 import '../../features/products/data/repositories/product_repository_impl.dart';
 import '../../features/products/domain/repositories/product_repository.dart';
@@ -44,9 +50,37 @@ Future<void> configureDependencies() async {
   //emulator
   //const baseUrl = 'http://10.0.2.2:3000/api';
 
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
   getIt
     ..registerLazySingleton<Dio>(() => Dio(BaseOptions(baseUrl: baseUrl)))
-    ..registerLazySingleton<ApiClient>(() => ApiClient(getIt()));
+    ..registerLazySingleton<ApiClient>(() => ApiClient(getIt()))
+    ..registerLazySingleton<AuthStorage>(() => AuthStorage(getIt()));
+
+  getIt<Dio>().interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        final token = getIt<AuthStorage>().token;
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+    ),
+  );
+
+  getIt
+    ..registerLazySingleton<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(apiClient: getIt()),
+    )
+    ..registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(
+        remoteDataSource: getIt(),
+        authStorage: getIt(),
+      ),
+    )
+    ..registerFactory<AuthBloc>(() => AuthBloc(authRepository: getIt()));
 
   // ===== Product Feature =====
   getIt
