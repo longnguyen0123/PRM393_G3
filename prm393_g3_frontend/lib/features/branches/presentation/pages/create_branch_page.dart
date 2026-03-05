@@ -32,7 +32,11 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
         body: BlocConsumer<BranchBloc, BranchState>(
           listener: (context, state) {
             if (state is BranchLoaded) {
-              Navigator.pushReplacementNamed(context, '/branch-list');
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop('created');
+              } else {
+                Navigator.pushReplacementNamed(context, '/branch-list');
+              }
             }
 
             if (state is BranchError) {
@@ -87,7 +91,7 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
 
                         // Status Dropdown
                         DropdownButtonFormField<String>(
-                          value: _status,
+                          initialValue: _status,
                           decoration: const InputDecoration(
                             labelText: "Status",
                             border: OutlineInputBorder(),

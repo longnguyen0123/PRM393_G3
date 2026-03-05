@@ -19,6 +19,8 @@ import '../../features/branches/domain/repositories/branch_repository.dart';
 import '../../features/branches/domain/usecases/get_branch.dart';
 import '../../features/branches/presentation/bloc/branch_bloc.dart';
 import '../../features/branches/domain/usecases/create_branch.dart';
+import '../../features/branches/domain/usecases/update_branch.dart';
+import '../../features/branches/domain/usecases/delete_branch.dart';
 
 // ===== Variant Feature Imports =====
 import '../../features/variants/data/datasources/variant_remote_data_source.dart';
@@ -104,8 +106,17 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton(() => CreateBranch(getIt()));
 
+  getIt.registerLazySingleton(() => UpdateBranch(getIt()));
+
+  getIt.registerLazySingleton(() => DeleteBranch(getIt()));
+
   getIt.registerFactory(
-    () => BranchBloc(getBranches: getIt(), createBranch: getIt()),
+    () => BranchBloc(
+      getBranches: getIt(),
+      createBranch: getIt(),
+      updateBranch: getIt(),
+      deleteBranch: getIt(),
+    ),
   );
 
   // ===== Variant Feature =====
