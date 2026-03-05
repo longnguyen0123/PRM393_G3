@@ -26,4 +26,22 @@ class BranchRemoteDataSource {
 
     return BranchModel.fromJson(response.data['data']);
   }
+
+  Future<BranchModel> updateBranch({
+    required String id,
+    required String name,
+    required String address,
+    required String status,
+  }) async {
+    final response = await apiClient.put(
+      '/branches/$id',
+      data: {'name': name, 'address': address, 'status': status},
+    );
+
+    return BranchModel.fromJson(response.data['data']);
+  }
+
+  Future<void> deleteBranch(String id) async {
+    await apiClient.delete('/branches/$id');
+  }
 }
