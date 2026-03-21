@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+
+import '../network/api_config.dart'
+    if (dart.library.io) '../network/api_config_io.dart' as api_config;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../storage/auth_storage.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
