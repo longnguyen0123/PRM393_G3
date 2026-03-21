@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+
+import '../network/api_config.dart'
+    if (dart.library.io) '../network/api_config_io.dart' as api_config;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../storage/auth_storage.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -44,11 +47,8 @@ import '../../features/categories/presentation/bloc/category_bloc.dart';
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
-  //localhost
-  const baseUrl = 'http://localhost:3000/api';
-
-  //emulator
-  //const baseUrl = 'http://10.0.2.2:3000/api';
+  // Base URL: Web dùng api_config (localhost), Android dùng api_config_io (10.0.2.2)
+  final baseUrl = api_config.apiBaseUrl;
 
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
