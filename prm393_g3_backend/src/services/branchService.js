@@ -1,6 +1,8 @@
 import {
   getAllBranches,
-  createBranch as createBranchRepository
+  createBranch as createBranchRepository,
+  updateBranchById,
+  deleteBranchById,
 } from '../repositories/branchRepository.js';
 
 import { getTotalStockByBranch }
@@ -23,4 +25,28 @@ export const getAllBranchesWithStock = async () => {
 
 export const createBranch = async (data) => {
   return await createBranchRepository(data);
+};
+
+export const updateBranch = async (id, data) => {
+  const updated = await updateBranchById(id, data);
+
+  if (!updated) {
+    const error = new Error('Branch not found');
+    error.status = 404;
+    throw error;
+  }
+
+  return updated;
+};
+
+export const deleteBranch = async (id) => {
+  const deleted = await deleteBranchById(id);
+
+  if (!deleted) {
+    const error = new Error('Branch not found');
+    error.status = 404;
+    throw error;
+  }
+
+  return deleted;
 };

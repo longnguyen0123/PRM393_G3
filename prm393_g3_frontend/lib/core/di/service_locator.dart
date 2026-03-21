@@ -22,6 +22,8 @@ import '../../features/branches/domain/repositories/branch_repository.dart';
 import '../../features/branches/domain/usecases/get_branch.dart';
 import '../../features/branches/presentation/bloc/branch_bloc.dart';
 import '../../features/branches/domain/usecases/create_branch.dart';
+import '../../features/branches/domain/usecases/update_branch.dart';
+import '../../features/branches/domain/usecases/delete_branch.dart';
 
 // ===== Variant Feature Imports =====
 import '../../features/variants/data/datasources/variant_remote_data_source.dart';
@@ -47,8 +49,11 @@ import '../../features/categories/presentation/bloc/category_bloc.dart';
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
-  // Base URL: Web dùng api_config (localhost), Android dùng api_config_io (10.0.2.2)
-  final baseUrl = api_config.apiBaseUrl;
+  //localhost
+  //const baseUrl = 'http://localhost:3000/api';
+
+  //emulator
+  const baseUrl = 'http://10.0.2.2:3000/api';
 
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
@@ -104,8 +109,17 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton(() => CreateBranch(getIt()));
 
+  getIt.registerLazySingleton(() => UpdateBranch(getIt()));
+
+  getIt.registerLazySingleton(() => DeleteBranch(getIt()));
+
   getIt.registerFactory(
-    () => BranchBloc(getBranches: getIt(), createBranch: getIt()),
+    () => BranchBloc(
+      getBranches: getIt(),
+      createBranch: getIt(),
+      updateBranch: getIt(),
+      deleteBranch: getIt(),
+    ),
   );
 
   // ===== Variant Feature =====
