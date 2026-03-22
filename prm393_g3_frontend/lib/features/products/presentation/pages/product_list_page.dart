@@ -385,14 +385,31 @@ class _ProductListPageState extends State<ProductListPage> {
                                   final brandLabel = _displayBrandLabel(product, brandState);
                                   final categoryLabel = _displayCategoryLabel(product, categoryState);
                                   return GestureDetector(
-                                    onTap: () {
+                                    onTap: () async {
                                       final enriched =
                                           _productWithResolvedNames(product, brandState, categoryState);
-                                      Navigator.of(context).push(
+                                      final result = await Navigator.of(context).push<String>(
                                         MaterialPageRoute(
                                           builder: (context) => ProductDetailPage(product: enriched),
                                         ),
                                       );
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+                                      if (result == 'updated') {
+                                        context.read<ProductBloc>().add(
+                                              ProductRefreshed(
+                                                brandId: _selectedBrandId,
+                                                categoryId: _selectedCategoryId,
+                                                searchQuery: _searchController.text.isEmpty
+                                                    ? null
+                                                    : _searchController.text,
+                                              ),
+                                            );
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Đã cập nhật sản phẩm')),
+                                        );
+                                      }
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(bottom: 12),
