@@ -1,0 +1,18 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c00112233440f" },
+    "productId": { "$oid": "673c1f1e1d1c00112233440d" },
+    "sku": "CANON-R8-BODY",
+    "barcode": "1111111111111",
+    "price": 35000000,
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334410" },
+    "productId": { "$oid": "673c1f1e1d1c00112233440e" },
+    "sku": "SONY-A7IV-BODY",
+    "barcode": "2222222222222",
+    "price": 48000000,
+    "status": "ACTIVE"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c00112233440d" },
+    "name": "Canon EOS R8",
+    "brandId": { "$oid": "673c1f1e1d1c001122334407" },
+    "categoryId": { "$oid": "673c1f1e1d1c00112233440a" },
+    "description": "Full-frame mirrorless camera",
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c00112233440e" },
+    "name": "Sony A7 IV",
+    "brandId": { "$oid": "673c1f1e1d1c001122334408" },
+    "categoryId": { "$oid": "673c1f1e1d1c00112233440a" },
+    "description": "33MP full-frame mirrorless camera",
+    "status": "ACTIVE"
+  }
+]

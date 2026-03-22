@@ -1,0 +1,5 @@
+[
+  { "_id": { "$oid": "673c1f1e1d1c00112233440a" }, "name": "Camera Body" },
+  { "_id": { "$oid": "673c1f1e1d1c00112233440b" }, "name": "Lens" },
+  { "_id": { "$oid": "673c1f1e1d1c00112233440c" }, "name": "Accessories" }
+]

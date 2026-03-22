@@ -11,4 +11,14 @@ class BrandRepositoryImpl implements BrandRepository {
   Future<List<Brand>> getBrands() async {
     return remoteDataSource.fetchBrands();
   }
+
+  @override
+  Future<Brand> createBrand({required String name, String? status}) {
+    return remoteDataSource.createBrand(name: name, status: status);
+  }
+
+  @override
+  Future<Brand> updateBrand({required String id, String? name, String? status}) {
+    return remoteDataSource.updateBrand(id: id, name: name, status: status);
+  }
 }

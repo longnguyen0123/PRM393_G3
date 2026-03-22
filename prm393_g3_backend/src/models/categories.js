@@ -2,13 +2,10 @@ import mongoose from 'mongoose';
 
 const categorySchema = new mongoose.Schema(
   {
-    _id: { type: String, required: true },
     name: { type: String, required: true },
+    status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
   },
-  {
-    timestamps: true,
-    _id: false, // we define _id manually as String
-  },
+  { timestamps: true },
 );
 
 // Explicitly map to the 'categories' collection

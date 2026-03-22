@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../bloc/variant_bloc.dart';
 import '../../domain/entities/variant.dart';
@@ -12,7 +13,9 @@ class VariantListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdminOnlyPage(
+      title: 'Variants',
+      child: Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -21,9 +24,26 @@ class VariantListPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Variants',
-          style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Variants',
+              style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            if (productName.isNotEmpty)
+              Text(
+                productName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+          ],
         ),
         actions: [
           IconButton(
@@ -55,43 +75,45 @@ class VariantListPage extends StatelessWidget {
               );
             case VariantStatus.success:
               if (state.variants.isEmpty) {
-                return const Center(child: Text('No variants found'));
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<VariantBloc>().add(VariantRefreshed(productId));
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 120),
+                      Center(child: Text('No variants found')),
+                    ],
+                  ),
+                );
               }
               return RefreshIndicator(
                 onRefresh: () async {
                   context.read<VariantBloc>().add(VariantRefreshed(productId));
                 },
-                child: Container(
-                  color: Colors.white,
+                child: ListView(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Variant List',
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: const Text(
+                        'Variant list',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: state.variants.length,
-                          itemBuilder: (context, index) {
-                            final variant = state.variants[index];
-                            return _buildVariantCard(variant);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    ...state.variants.map((variant) => _buildVariantCard(variant)),
+                  ],
                 ),
               );
             case VariantStatus.initial:
-            default:
               return const SizedBox.shrink();
           }
         },
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 1),
+    ),
     );
   }
 
@@ -100,7 +122,7 @@ class VariantListPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!),
       ),
@@ -115,6 +137,8 @@ class VariantListPage extends StatelessWidget {
           _buildVariantInfoRow('SKU:', variant.sku),
           if (variant.barcode != null) _buildVariantInfoRow('Barcode:', variant.barcode!),
           _buildVariantInfoRow('Price:', '\$${variant.price.toStringAsFixed(2)}', isPrice: true),
+          if (variant.status.isNotEmpty)
+            _buildVariantInfoRow('Status:', variant.status),
         ],
       ),
     );

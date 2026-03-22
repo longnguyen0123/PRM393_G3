@@ -24,6 +24,7 @@ class _EditBranchPageState extends State<EditBranchPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
   late String _status;
+  late bool _inventoryDelegatedToManager;
   String? _pendingAction;
 
   @override
@@ -32,6 +33,7 @@ class _EditBranchPageState extends State<EditBranchPage> {
     _nameController = TextEditingController(text: widget.branch.name);
     _addressController = TextEditingController(text: widget.branch.address);
     _status = widget.branch.status;
+    _inventoryDelegatedToManager = widget.branch.inventoryDelegatedToManager;
   }
 
   @override
@@ -70,45 +72,6 @@ class _EditBranchPageState extends State<EditBranchPage> {
               centerTitle: true,
               title: const Text('Edit Branch'),
               actions: [
-                IconButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          final branchBloc = context.read<BranchBloc>();
-                          final shouldDelete = await showDialog<bool>(
-                            context: context,
-                            builder: (dialogContext) => AlertDialog(
-                              title: const Text('Delete Branch'),
-                              content: Text(
-                                'Are you sure you want to delete ${widget.branch.name}?',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop(false);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop(true);
-                                  },
-                                  child: const Text('Delete'),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (shouldDelete == true && mounted) {
-                            _pendingAction = 'deleted';
-                            branchBloc.add(
-                                  BranchDeleteRequested(widget.branch.id),
-                                );
-                          }
-                        },
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Delete Branch',
-                ),
                 IconButton(
                   onPressed: () {},
                   icon: const Icon(Icons.account_circle_outlined),
@@ -156,10 +119,13 @@ class _EditBranchPageState extends State<EditBranchPage> {
                               ),
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
+                                key: ValueKey(_status),
                                 initialValue: _status,
                                 decoration: const InputDecoration(
                                   labelText: 'Branch Status',
                                   border: OutlineInputBorder(),
+                                  helperText:
+                                      'Chọn Inactive để ngưng hoạt động chi nhánh (không xóa dữ liệu).',
                                 ),
                                 items: const [
                                   DropdownMenuItem(
@@ -172,8 +138,23 @@ class _EditBranchPageState extends State<EditBranchPage> {
                                   ),
                                 ],
                                 onChanged: (value) {
+                                  if (value == null) return;
                                   setState(() {
-                                    _status = value!;
+                                    _status = value;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              SwitchListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Giao quản lý kho cho Branch Manager'),
+                                subtitle: const Text(
+                                  'Khi bật, Branch Manager được phép thêm / vô hiệu hóa nhân viên kho tại chi nhánh này.',
+                                ),
+                                value: _inventoryDelegatedToManager,
+                                onChanged: (v) {
+                                  setState(() {
+                                    _inventoryDelegatedToManager = v;
                                   });
                                 },
                               ),
@@ -195,6 +176,8 @@ class _EditBranchPageState extends State<EditBranchPage> {
                                         status: _status,
                                         totalItemsInStock:
                                             widget.branch.totalItemsInStock,
+                                        inventoryDelegatedToManager:
+                                            _inventoryDelegatedToManager,
                                       );
 
                                       _pendingAction = 'updated';

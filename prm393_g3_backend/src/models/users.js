@@ -9,7 +9,13 @@ const userSchema = new mongoose.Schema({
     enum: ['ADMIN', 'BRANCH_MANAGER', 'CASHIER', 'INVENTORY_STAFF'],
     required: true,
   },
+  /** Chi nhánh làm việc (CASHIER, INVENTORY_STAFF). */
   branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', default: null },
+  /** Chi nhánh mà BRANCH_MANAGER được phép quản lý (nhiều chi nhánh). */
+  managedBranchIds: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' }],
+    default: [],
+  },
   status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
 }, { timestamps: true });
 

@@ -23,7 +23,6 @@ import '../../features/branches/domain/usecases/get_branch.dart';
 import '../../features/branches/presentation/bloc/branch_bloc.dart';
 import '../../features/branches/domain/usecases/create_branch.dart';
 import '../../features/branches/domain/usecases/update_branch.dart';
-import '../../features/branches/domain/usecases/delete_branch.dart';
 
 // ===== Variant Feature Imports =====
 import '../../features/variants/data/datasources/variant_remote_data_source.dart';
@@ -36,24 +35,25 @@ import '../../features/variants/presentation/bloc/variant_bloc.dart';
 import '../../features/brands/data/datasources/brand_remote_data_source.dart';
 import '../../features/brands/data/repositories/brand_repository_impl.dart';
 import '../../features/brands/domain/repositories/brand_repository.dart';
+import '../../features/brands/domain/usecases/create_brand.dart';
 import '../../features/brands/domain/usecases/get_brands_usecase.dart';
+import '../../features/brands/domain/usecases/update_brand.dart';
 import '../../features/brands/presentation/bloc/brand_bloc.dart';
 
 // ===== Category Feature Imports =====
 import '../../features/categories/data/datasources/category_remote_data_source.dart';
 import '../../features/categories/data/repositories/category_repository_impl.dart';
 import '../../features/categories/domain/repositories/category_repository.dart';
+import '../../features/categories/domain/usecases/create_category.dart';
 import '../../features/categories/domain/usecases/get_categories_usecase.dart';
+import '../../features/categories/domain/usecases/update_category.dart';
 import '../../features/categories/presentation/bloc/category_bloc.dart';
+import '../../features/admin_users/data/admin_user_remote_datasource.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
-  //localhost
-  //const baseUrl = 'http://localhost:3000/api';
-
-  //emulator
-  const baseUrl = 'http://10.0.2.2:3000/api';
+  final baseUrl = api_config.apiBaseUrl;
 
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
@@ -111,14 +111,11 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton(() => UpdateBranch(getIt()));
 
-  getIt.registerLazySingleton(() => DeleteBranch(getIt()));
-
   getIt.registerFactory(
     () => BranchBloc(
       getBranches: getIt(),
       createBranch: getIt(),
       updateBranch: getIt(),
-      deleteBranch: getIt(),
     ),
   );
 
@@ -148,7 +145,15 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GetBrandsUseCase>(
       () => GetBrandsUseCase(repository: getIt()),
     )
-    ..registerFactory<BrandBloc>(() => BrandBloc(getBrandsUseCase: getIt()));
+    ..registerLazySingleton<CreateBrand>(() => CreateBrand(getIt()))
+    ..registerLazySingleton<UpdateBrand>(() => UpdateBrand(getIt()))
+    ..registerFactory<BrandBloc>(
+      () => BrandBloc(
+        getBrandsUseCase: getIt(),
+        createBrand: getIt(),
+        updateBrand: getIt(),
+      ),
+    );
 
   // ===== Category Feature =====
   getIt
@@ -161,7 +166,17 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GetCategoriesUseCase>(
       () => GetCategoriesUseCase(repository: getIt()),
     )
+    ..registerLazySingleton<CreateCategory>(() => CreateCategory(getIt()))
+    ..registerLazySingleton<UpdateCategory>(() => UpdateCategory(getIt()))
     ..registerFactory<CategoryBloc>(
-      () => CategoryBloc(getCategoriesUseCase: getIt()),
+      () => CategoryBloc(
+        getCategoriesUseCase: getIt(),
+        createCategory: getIt(),
+        updateCategory: getIt(),
+      ),
     );
+
+  getIt.registerLazySingleton<AdminUserRemoteDataSource>(
+    () => AdminUserRemoteDataSource(getIt()),
+  );
 }

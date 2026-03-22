@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/branch.dart';
 import '../bloc/branch_bloc.dart';
 import '../bloc/branch_event.dart';
@@ -20,9 +22,36 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
   final _addressController = TextEditingController();
 
   String _status = "ACTIVE";
+  bool _inventoryDelegatedToManager = false;
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthBloc>().state;
+    if (auth is! AuthAuthenticated || auth.user.role != 'ADMIN') {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Tạo chi nhánh')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Chỉ quản trị viên được tạo chi nhánh mới.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Quay lại'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return BlocProvider(
       create: (_) => getIt<BranchBloc>(),
       child: Scaffold(
@@ -113,6 +142,23 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
                           },
                         ),
 
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text(
+                            'Giao quản lý kho cho Branch Manager',
+                          ),
+                          subtitle: const Text(
+                            'Có thể bật sau trong màn sửa chi nhánh.',
+                          ),
+                          value: _inventoryDelegatedToManager,
+                          onChanged: (v) {
+                            setState(() {
+                              _inventoryDelegatedToManager = v;
+                            });
+                          },
+                        ),
+
                         const SizedBox(height: 24),
 
                         // Submit Button
@@ -127,6 +173,8 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
                                   address: _addressController.text.trim(),
                                   status: _status,
                                   totalItemsInStock: 0,
+                                  inventoryDelegatedToManager:
+                                      _inventoryDelegatedToManager,
                                 );
 
                                 context.read<BranchBloc>().add(

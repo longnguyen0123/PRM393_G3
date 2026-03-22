@@ -1,0 +1,18 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334401" },
+    "name": "Hanoi Branch",
+    "address": "Ba Dinh, Hanoi",
+    "status": "ACTIVE",
+    "inventoryDelegatedToManager": true,
+    "createdAt": "2026-01-01T00:00:00Z"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334402" },
+    "name": "HCM Branch",
+    "address": "District 1, Ho Chi Minh City",
+    "status": "ACTIVE",
+    "inventoryDelegatedToManager": true,
+    "createdAt": "2026-01-01T00:00:00Z"
+  }
+]

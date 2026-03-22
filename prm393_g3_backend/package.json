@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "nodemon src/server.js",
     "lint": "eslint \"src/**/*.js\" || true"
   },
   "dependencies": {
@@ -16,10 +16,8 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.0",
-    "morgan": "^1.10.0"
-  },
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "nodemon": "^3.0.2"
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.14",
+    "eslint": "^8.56.0"
   }
 }
