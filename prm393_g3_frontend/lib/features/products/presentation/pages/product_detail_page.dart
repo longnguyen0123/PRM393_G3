@@ -5,6 +5,7 @@ import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../../domain/entities/product.dart';
 import '../../../variants/presentation/pages/variant_list_page.dart';
 import '../../../variants/presentation/bloc/variant_bloc.dart';
+import 'edit_product_page.dart';
 
 class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({super.key, required this.product});
@@ -26,6 +27,22 @@ class ProductDetailPage extends StatelessWidget {
           product.name,
           style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.black),
+            onPressed: () async {
+              final result = await Navigator.of(context).push<String>(
+                MaterialPageRoute(builder: (_) => EditProductPage(product: product)),
+              );
+              if (!context.mounted) {
+                return;
+              }
+              if (result == 'updated') {
+                Navigator.of(context).pop('updated');
+              }
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

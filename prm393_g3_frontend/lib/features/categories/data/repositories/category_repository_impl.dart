@@ -11,4 +11,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<List<Category>> getCategories() async {
     return remoteDataSource.fetchCategories();
   }
+
+  @override
+  Future<Category> createCategory({required String name, String? status}) {
+    return remoteDataSource.createCategory(name: name, status: status);
+  }
+
+  @override
+  Future<Category> updateCategory({required String id, String? name, String? status}) {
+    return remoteDataSource.updateCategory(id: id, name: name, status: status);
+  }
 }

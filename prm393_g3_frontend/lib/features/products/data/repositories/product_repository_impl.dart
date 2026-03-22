@@ -39,4 +39,40 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<List<Product>> searchProducts(String query) async {
     return remoteDataSource.searchProducts(query);
   }
+
+  @override
+  Future<Product> createProduct({
+    required String name,
+    required String brandId,
+    required String categoryId,
+    String? description,
+    String status = 'ACTIVE',
+  }) {
+    return remoteDataSource.createProduct(
+      name: name,
+      brandId: brandId,
+      categoryId: categoryId,
+      description: description,
+      status: status,
+    );
+  }
+
+  @override
+  Future<Product> updateProduct(
+    String id, {
+    String? name,
+    String? brandId,
+    String? categoryId,
+    String? description,
+    String? status,
+  }) {
+    return remoteDataSource.updateProduct(
+      id,
+      name: name,
+      brandId: brandId,
+      categoryId: categoryId,
+      description: description,
+      status: status,
+    );
+  }
 }

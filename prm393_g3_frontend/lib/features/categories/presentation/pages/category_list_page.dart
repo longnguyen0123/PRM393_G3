@@ -8,9 +8,14 @@ import '../../../brands/presentation/bloc/brand_bloc.dart';
 import '../../../brands/domain/entities/brand.dart';
 import '../../domain/entities/category.dart';
 
-class CategoryListPage extends StatelessWidget {
+class CategoryListPage extends StatefulWidget {
   const CategoryListPage({super.key});
 
+  @override
+  State<CategoryListPage> createState() => _CategoryListPageState();
+}
+
+class _CategoryListPageState extends State<CategoryListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,15 +45,35 @@ class CategoryListPage extends StatelessWidget {
             create: (context) => getIt<CategoryBloc>()..add(const CategoryRequested()),
           ),
         ],
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              _buildBrandsSection(context),
-              const SizedBox(height: 16),
-              _buildCategoriesSection(context),
-            ],
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<BrandBloc, BrandState>(
+              listenWhen: (p, c) => c.status == BrandStatus.failure,
+              listener: (context, state) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.errorMessage ?? 'Brand error')),
+                );
+              },
+            ),
+            BlocListener<CategoryBloc, CategoryState>(
+              listenWhen: (p, c) => c.status == CategoryStatus.failure,
+              listener: (context, state) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.errorMessage ?? 'Category error')),
+                );
+              },
+            ),
+          ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                _buildBrandsSection(context),
+                const SizedBox(height: 16),
+                _buildCategoriesSection(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -62,9 +87,20 @@ class CategoryListPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Brands',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Brands',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline, color: Colors.black),
+                onPressed: () => _showBrandDialog(context),
+                tooltip: 'Add brand',
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           BlocBuilder<BrandBloc, BrandState>(
@@ -79,12 +115,21 @@ class CategoryListPage extends StatelessWidget {
                 return const Text('No brands found');
               }
               return Column(
-                children: state.brands.map((brand) => _buildListItem(brand.name, brand.status ?? 'ACTIVE')).toList(),
+                children: state.brands
+                    .map<Widget>((Brand brand) => _brandTile(context, brand))
+                    .toList(),
               );
             },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _brandTile(BuildContext context, Brand brand) {
+    return InkWell(
+      onTap: () => _showBrandDialog(context, brand: brand),
+      child: _buildListItem(brand.name, brand.status ?? 'ACTIVE'),
     );
   }
 
@@ -95,9 +140,20 @@ class CategoryListPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Categories',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Categories',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline, color: Colors.black),
+                onPressed: () => _showCategoryDialog(context),
+                tooltip: 'Add category',
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           BlocBuilder<CategoryBloc, CategoryState>(
@@ -112,12 +168,165 @@ class CategoryListPage extends StatelessWidget {
                 return const Text('No categories found');
               }
               return Column(
-                children: state.categories.map((category) => _buildListItem(category.name, category.status ?? 'ACTIVE')).toList(),
+                children: state.categories
+                    .map<Widget>((Category category) => _categoryTile(context, category))
+                    .toList(),
               );
             },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _categoryTile(BuildContext context, Category category) {
+    return InkWell(
+      onTap: () => _showCategoryDialog(context, category: category),
+      child: _buildListItem(category.name, category.status ?? 'ACTIVE'),
+    );
+  }
+
+  void _showBrandDialog(BuildContext context, {Brand? brand}) {
+    final bloc = context.read<BrandBloc>();
+    final nameCtrl = TextEditingController(text: brand?.name ?? '');
+    String status = brand?.status ?? 'ACTIVE';
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setLocalState) {
+            return AlertDialog(
+              title: Text(brand == null ? 'New brand' : 'Edit brand'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                        border: OutlineInputBorder(),
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: status,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'ACTIVE', child: Text('Active')),
+                        DropdownMenuItem(value: 'INACTIVE', child: Text('Inactive')),
+                      ],
+                      onChanged: (v) {
+                        setLocalState(() {
+                          status = v ?? 'ACTIVE';
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final name = nameCtrl.text.trim();
+                    if (name.isEmpty) {
+                      return;
+                    }
+                    if (brand == null) {
+                      bloc.add(BrandCreateRequested(name: name, status: status));
+                    } else {
+                      bloc.add(BrandUpdateRequested(id: brand.id, name: name, status: status));
+                    }
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCategoryDialog(BuildContext context, {Category? category}) {
+    final bloc = context.read<CategoryBloc>();
+    final nameCtrl = TextEditingController(text: category?.name ?? '');
+    String status = category?.status ?? 'ACTIVE';
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setLocalState) {
+            return AlertDialog(
+              title: Text(category == null ? 'New category' : 'Edit category'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                        border: OutlineInputBorder(),
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: status,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'ACTIVE', child: Text('Active')),
+                        DropdownMenuItem(value: 'INACTIVE', child: Text('Inactive')),
+                      ],
+                      onChanged: (v) {
+                        setLocalState(() {
+                          status = v ?? 'ACTIVE';
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final name = nameCtrl.text.trim();
+                    if (name.isEmpty) {
+                      return;
+                    }
+                    if (category == null) {
+                      bloc.add(CategoryCreateRequested(name: name, status: status));
+                    } else {
+                      bloc.add(CategoryUpdateRequested(id: category.id, name: name, status: status));
+                    }
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

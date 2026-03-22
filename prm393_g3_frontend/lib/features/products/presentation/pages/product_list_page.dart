@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../domain/entities/product.dart';
 import '../bloc/product_bloc.dart';
-import '../../../../core/widgets/product_card.dart';
-import '../../../categories/presentation/pages/category_list_page.dart';
 import '../../../brands/presentation/bloc/brand_bloc.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../brands/domain/entities/brand.dart';
 import '../../../categories/domain/entities/category.dart';
+import 'create_product_page.dart';
 import 'product_detail_page.dart';
 
 class ProductListPage extends StatefulWidget {
@@ -51,8 +51,25 @@ class _ProductListPageState extends State<ProductListPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black),
-            onPressed: () {
-              // TODO: Implement add product functionality
+            onPressed: () async {
+              final result = await Navigator.of(context).push<String>(
+                MaterialPageRoute(builder: (_) => const CreateProductPage()),
+              );
+              if (!context.mounted) {
+                return;
+              }
+              if (result == 'created') {
+                context.read<ProductBloc>().add(
+                      ProductRefreshed(
+                        brandId: _selectedBrandId,
+                        categoryId: _selectedCategoryId,
+                        searchQuery: _searchController.text.isEmpty ? null : _searchController.text,
+                      ),
+                    );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Product created')),
+                );
+              }
             },
           ),
         ],
@@ -120,13 +137,13 @@ class _ProductListPageState extends State<ProductListPage> {
                         child: const Text('Loading brands...'),
                       );
                     }
-                    return _buildFilterDropdown(
+                    return _buildFilterDropdown<Brand>(
                       context,
                       'Brand',
                       _selectedBrandId,
                       brandState.brands,
-                      (brand) => brand.id,
-                      (brand) => brand.name,
+                      (Brand brand) => brand.id,
+                      (Brand brand) => brand.name,
                       (value) {
                         setState(() {
                           _selectedBrandId = value;
@@ -157,13 +174,13 @@ class _ProductListPageState extends State<ProductListPage> {
                         child: const Text('Loading categories...'),
                       );
                     }
-                    return _buildFilterDropdown(
+                    return _buildFilterDropdown<Category>(
                       context,
                       'Category',
                       _selectedCategoryId,
                       categoryState.categories,
-                      (category) => category.id,
-                      (category) => category.name,
+                      (Category category) => category.id,
+                      (Category category) => category.name,
                       (value) {
                         setState(() {
                           _selectedCategoryId = value;
@@ -235,129 +252,217 @@ class _ProductListPageState extends State<ProductListPage> {
     );
   }
 
+  static String? _lookupBrandName(BrandState brandState, String brandId) {
+    if (brandId.isEmpty) {
+      return null;
+    }
+    for (final b in brandState.brands) {
+      if (b.id == brandId) {
+        return b.name;
+      }
+    }
+    return null;
+  }
+
+  static String? _lookupCategoryName(CategoryState categoryState, String categoryId) {
+    if (categoryId.isEmpty) {
+      return null;
+    }
+    for (final c in categoryState.categories) {
+      if (c.id == categoryId) {
+        return c.name;
+      }
+    }
+    return null;
+  }
+
+  String _displayBrandLabel(Product product, BrandState brandState) {
+    final fromProduct = product.brandName?.trim();
+    if (fromProduct != null && fromProduct.isNotEmpty) {
+      return fromProduct;
+    }
+    final fromList = _lookupBrandName(brandState, product.brandId);
+    if (fromList != null) {
+      return fromList;
+    }
+    if (product.brandId.isNotEmpty) {
+      return product.brandId;
+    }
+    return 'N/A';
+  }
+
+  String _displayCategoryLabel(Product product, CategoryState categoryState) {
+    final fromProduct = product.categoryName?.trim();
+    if (fromProduct != null && fromProduct.isNotEmpty) {
+      return fromProduct;
+    }
+    final fromList = _lookupCategoryName(categoryState, product.categoryId);
+    if (fromList != null) {
+      return fromList;
+    }
+    if (product.categoryId.isNotEmpty) {
+      return product.categoryId;
+    }
+    return 'N/A';
+  }
+
+  Product _productWithResolvedNames(
+    Product product,
+    BrandState brandState,
+    CategoryState categoryState,
+  ) {
+    final bn = product.brandName ?? _lookupBrandName(brandState, product.brandId);
+    final cn = product.categoryName ?? _lookupCategoryName(categoryState, product.categoryId);
+    return Product(
+      id: product.id,
+      name: product.name,
+      brandId: product.brandId,
+      categoryId: product.categoryId,
+      description: product.description,
+      status: product.status,
+      brandName: bn,
+      categoryName: cn,
+    );
+  }
+
   Widget _buildProductList(BuildContext context) {
-    return BlocBuilder<ProductBloc, ProductState>(
-      builder: (context, state) {
-        switch (state.status) {
-          case ProductStatus.loading:
-            return const Center(child: CircularProgressIndicator());
-          case ProductStatus.failure:
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(state.errorMessage ?? 'Error loading products'),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => context.read<ProductBloc>().add(const ProductRequested()),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          case ProductStatus.success:
-            if (state.products.isEmpty) {
-              return const Center(child: Text('No products found'));
-            }
-            return Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Product List',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        context.read<ProductBloc>().add(ProductRefreshed(
-                              brandId: _selectedBrandId,
-                              categoryId: _selectedCategoryId,
-                              searchQuery: _searchController.text.isEmpty ? null : _searchController.text,
-                            ));
-                      },
-                      child: ListView.builder(
-                        itemCount: state.products.length,
-                        itemBuilder: (context, index) {
-                          final product = state.products[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ProductDetailPage(product: product),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey[300]!),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          product.name,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
+    return BlocBuilder<BrandBloc, BrandState>(
+      builder: (context, brandState) {
+        return BlocBuilder<CategoryBloc, CategoryState>(
+          builder: (context, categoryState) {
+            return BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                switch (state.status) {
+                  case ProductStatus.loading:
+                    return const Center(child: CircularProgressIndicator());
+                  case ProductStatus.failure:
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(state.errorMessage ?? 'Error loading products'),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: () => context.read<ProductBloc>().add(const ProductRequested()),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  case ProductStatus.success:
+                    if (state.products.isEmpty) {
+                      return const Center(child: Text('No products found'));
+                    }
+                    return Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Product List',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                          ),
+                          const SizedBox(height: 16),
+                          Expanded(
+                            child: RefreshIndicator(
+                              onRefresh: () async {
+                                context.read<ProductBloc>().add(ProductRefreshed(
+                                      brandId: _selectedBrandId,
+                                      categoryId: _selectedCategoryId,
+                                      searchQuery:
+                                          _searchController.text.isEmpty ? null : _searchController.text,
+                                    ));
+                              },
+                              child: ListView.builder(
+                                itemCount: state.products.length,
+                                itemBuilder: (context, index) {
+                                  final product = state.products[index];
+                                  final brandLabel = _displayBrandLabel(product, brandState);
+                                  final categoryLabel = _displayCategoryLabel(product, categoryState);
+                                  return GestureDetector(
+                                    onTap: () {
+                                      final enriched =
+                                          _productWithResolvedNames(product, brandState, categoryState);
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => ProductDetailPage(product: enriched),
                                         ),
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[50],
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.grey[300]!),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: product.status == 'ACTIVE' ? Colors.green[100] : Colors.red[100],
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          product.status,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: product.status == 'ACTIVE' ? Colors.green[800] : Colors.red[800],
-                                            fontWeight: FontWeight.bold,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  product.name,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: product.status == 'ACTIVE'
+                                                      ? Colors.green[100]
+                                                      : Colors.red[100],
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  product.status,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: product.status == 'ACTIVE'
+                                                        ? Colors.green[800]
+                                                        : Colors.red[800],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Brand: $brandLabel',
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                          ),
+                                          Text(
+                                            'Category: $categoryLabel',
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  if (product.brandName != null)
-                                    Text(
-                                      'Brand: ${product.brandName}',
-                                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                                     ),
-                                  if (product.categoryName != null)
-                                    Text(
-                                      'Category: ${product.categoryName}',
-                                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                                    ),
-                                ],
+                                  );
+                                },
                               ),
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
+                    );
+                  case ProductStatus.initial:
+                    return const SizedBox.shrink();
+                }
+              },
             );
-          case ProductStatus.initial:
-          default:
-            return const SizedBox.shrink();
-        }
+          },
+        );
       },
     );
   }

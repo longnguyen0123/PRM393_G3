@@ -11,6 +11,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductRequested>(_onRequested);
     on<ProductRefreshed>(_onRequested);
     on<ProductFilterChanged>(_onFilterChanged);
+    on<ProductCreateRequested>(_onCreate);
+    on<ProductUpdateRequested>(_onUpdate);
   }
 
   final ProductRepository repository;
@@ -47,5 +49,46 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       categoryId: event.categoryId,
       searchQuery: event.searchQuery,
     ));
+  }
+
+  Future<void> _onCreate(ProductCreateRequested event, Emitter<ProductState> emit) async {
+    emit(state.copyWith(status: ProductStatus.loading, errorMessage: null));
+    try {
+      await repository.createProduct(
+        name: event.name,
+        brandId: event.brandId,
+        categoryId: event.categoryId,
+        description: event.description,
+        status: event.status ?? 'ACTIVE',
+      );
+      add(ProductRequested(
+        brandId: state.selectedBrandId,
+        categoryId: state.selectedCategoryId,
+        searchQuery: state.searchQuery,
+      ));
+    } catch (e) {
+      emit(state.copyWith(status: ProductStatus.failure, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdate(ProductUpdateRequested event, Emitter<ProductState> emit) async {
+    emit(state.copyWith(status: ProductStatus.loading, errorMessage: null));
+    try {
+      await repository.updateProduct(
+        event.id,
+        name: event.name,
+        brandId: event.brandId,
+        categoryId: event.categoryId,
+        description: event.description,
+        status: event.status,
+      );
+      add(ProductRequested(
+        brandId: state.selectedBrandId,
+        categoryId: state.selectedCategoryId,
+        searchQuery: state.searchQuery,
+      ));
+    } catch (e) {
+      emit(state.copyWith(status: ProductStatus.failure, errorMessage: e.toString()));
+    }
   }
 }

@@ -36,14 +36,18 @@ import '../../features/variants/presentation/bloc/variant_bloc.dart';
 import '../../features/brands/data/datasources/brand_remote_data_source.dart';
 import '../../features/brands/data/repositories/brand_repository_impl.dart';
 import '../../features/brands/domain/repositories/brand_repository.dart';
+import '../../features/brands/domain/usecases/create_brand.dart';
 import '../../features/brands/domain/usecases/get_brands_usecase.dart';
+import '../../features/brands/domain/usecases/update_brand.dart';
 import '../../features/brands/presentation/bloc/brand_bloc.dart';
 
 // ===== Category Feature Imports =====
 import '../../features/categories/data/datasources/category_remote_data_source.dart';
 import '../../features/categories/data/repositories/category_repository_impl.dart';
 import '../../features/categories/domain/repositories/category_repository.dart';
+import '../../features/categories/domain/usecases/create_category.dart';
 import '../../features/categories/domain/usecases/get_categories_usecase.dart';
+import '../../features/categories/domain/usecases/update_category.dart';
 import '../../features/categories/presentation/bloc/category_bloc.dart';
 import '../../features/admin_users/data/admin_user_remote_datasource.dart';
 
@@ -149,7 +153,15 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GetBrandsUseCase>(
       () => GetBrandsUseCase(repository: getIt()),
     )
-    ..registerFactory<BrandBloc>(() => BrandBloc(getBrandsUseCase: getIt()));
+    ..registerLazySingleton<CreateBrand>(() => CreateBrand(getIt()))
+    ..registerLazySingleton<UpdateBrand>(() => UpdateBrand(getIt()))
+    ..registerFactory<BrandBloc>(
+      () => BrandBloc(
+        getBrandsUseCase: getIt(),
+        createBrand: getIt(),
+        updateBrand: getIt(),
+      ),
+    );
 
   // ===== Category Feature =====
   getIt
@@ -162,8 +174,14 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GetCategoriesUseCase>(
       () => GetCategoriesUseCase(repository: getIt()),
     )
+    ..registerLazySingleton<CreateCategory>(() => CreateCategory(getIt()))
+    ..registerLazySingleton<UpdateCategory>(() => UpdateCategory(getIt()))
     ..registerFactory<CategoryBloc>(
-      () => CategoryBloc(getCategoriesUseCase: getIt()),
+      () => CategoryBloc(
+        getCategoriesUseCase: getIt(),
+        createCategory: getIt(),
+        updateCategory: getIt(),
+      ),
     );
 
   getIt.registerLazySingleton<AdminUserRemoteDataSource>(
