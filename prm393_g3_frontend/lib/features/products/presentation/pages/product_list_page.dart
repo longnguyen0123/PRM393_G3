@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../domain/entities/product.dart';
@@ -33,7 +34,9 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdminOnlyPage(
+      title: 'Products',
+      child: Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -91,6 +94,7 @@ class _ProductListPageState extends State<ProductListPage> {
           ],
         ),
       ),
+    ),
     );
   }
 

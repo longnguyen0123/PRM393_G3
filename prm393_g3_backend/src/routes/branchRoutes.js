@@ -9,6 +9,9 @@ import {
   listInventoryStaffHandler,
   createInventoryStaffHandler,
   deactivateInventoryStaffHandler,
+  listCashiersHandler,
+  createCashierHandler,
+  deactivateCashierHandler,
 } from '../controllers/branchController.js';
 import {
   authenticate,
@@ -51,6 +54,21 @@ router.delete(
   '/:id/inventory-staff/:userId',
   ...branchManagerInventoryWrite,
   deactivateInventoryStaffHandler,
+);
+router.get(
+  '/:id/cashiers',
+  ...branchManagerInventoryRead,
+  listCashiersHandler,
+);
+router.post(
+  '/:id/cashiers',
+  ...branchManagerInventoryWrite,
+  createCashierHandler,
+);
+router.delete(
+  '/:id/cashiers/:userId',
+  ...branchManagerInventoryWrite,
+  deactivateCashierHandler,
 );
 router.get('/:id/manager-candidates', ...adminOnly, getBranchManagerCandidatesHandler);
 router.patch('/:id/branch-manager', ...adminOnly, assignBranchManagerHandler);

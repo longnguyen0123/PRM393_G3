@@ -115,6 +115,106 @@ class _AddInventoryStaffDialogState extends State<_AddInventoryStaffDialog> {
   }
 }
 
+class _AddCashierDialog extends StatefulWidget {
+  const _AddCashierDialog({
+    required this.branchId,
+    required this.onCreated,
+    required this.showError,
+  });
+
+  final String branchId;
+  final VoidCallback onCreated;
+  final void Function(String message) showError;
+
+  @override
+  State<_AddCashierDialog> createState() => _AddCashierDialogState();
+}
+
+class _AddCashierDialogState extends State<_AddCashierDialog> {
+  late final TextEditingController _usernameCtrl;
+  late final TextEditingController _passwordCtrl;
+  late final TextEditingController _fullNameCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameCtrl = TextEditingController();
+    _passwordCtrl = TextEditingController();
+    _fullNameCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _usernameCtrl.dispose();
+    _passwordCtrl.dispose();
+    _fullNameCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final u = _usernameCtrl.text.trim();
+    final p = _passwordCtrl.text;
+    final n = _fullNameCtrl.text.trim();
+    if (u.isEmpty || p.isEmpty || n.isEmpty) return;
+    final nav = Navigator.of(context);
+    final repo = getIt<BranchRepository>();
+    try {
+      await repo.createCashier(
+        widget.branchId,
+        username: u,
+        password: p,
+        fullName: n,
+      );
+      if (!mounted) return;
+      nav.pop();
+      widget.onCreated();
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e is DioException
+          ? (e.response?.data?.toString() ?? e.message ?? 'Lỗi')
+          : e.toString();
+      widget.showError(msg);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Thêm thu ngân'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _usernameCtrl,
+              decoration: const InputDecoration(labelText: 'Tên đăng nhập'),
+            ),
+            TextField(
+              controller: _passwordCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Mật khẩu'),
+            ),
+            TextField(
+              controller: _fullNameCtrl,
+              decoration: const InputDecoration(labelText: 'Họ tên'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Hủy'),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: const Text('Tạo'),
+        ),
+      ],
+    );
+  }
+}
+
 class BranchDetailPage extends StatefulWidget {
   const BranchDetailPage({
     super.key,
@@ -132,6 +232,7 @@ class BranchDetailPage extends StatefulWidget {
 class _BranchDetailPageState extends State<BranchDetailPage> {
   late Future<BranchDetail> _future;
   Future<List<InventoryStaffMember>>? _staffFuture;
+  Future<List<InventoryStaffMember>>? _cashiersFuture;
 
   @override
   void initState() {
@@ -147,13 +248,25 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
     _staffFuture = getIt<BranchRepository>().getInventoryStaff(widget.branchId);
   }
 
+  void _reloadCashiers() {
+    _cashiersFuture = getIt<BranchRepository>().getCashiers(widget.branchId);
+  }
+
   void _ensureStaffFuture(AuthState auth, Branch branch) {
-    if (!_canViewBranchInventoryStaff(auth)) {
+    if (!_canViewBranchOperationalStaff(auth)) {
       _staffFuture = null;
       return;
     }
     _staffFuture ??=
         getIt<BranchRepository>().getInventoryStaff(widget.branchId);
+  }
+
+  void _ensureCashiersFuture(AuthState auth, Branch branch) {
+    if (!_canViewBranchOperationalStaff(auth)) {
+      _cashiersFuture = null;
+      return;
+    }
+    _cashiersFuture ??= getIt<BranchRepository>().getCashiers(widget.branchId);
   }
 
   String _formatVnd(int? price) {
@@ -181,6 +294,7 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
       setState(() {
         _reloadDetail();
         _staffFuture = null;
+        _cashiersFuture = null;
       });
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -437,6 +551,30 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
     );
   }
 
+  Future<void> _openAddCashier(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _AddCashierDialog(
+        branchId: widget.branchId,
+        onCreated: () {
+          if (!context.mounted) return;
+          setState(_reloadCashiers);
+          ScaffoldMessenger.maybeOf(context)
+            ?..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Đã tạo tài khoản thu ngân')),
+            );
+        },
+        showError: (msg) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.maybeOf(context)
+            ?..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(msg)));
+        },
+      ),
+    );
+  }
+
   Future<void> _confirmDeactivateStaff(
     BuildContext context,
     InventoryStaffMember s,
@@ -488,17 +626,74 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
     }
   }
 
+  Future<void> _confirmDeactivateCashier(
+    BuildContext context,
+    InventoryStaffMember s,
+  ) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Vô hiệu hóa tài khoản'),
+        content: Text('Vô hiệu hóa thu ngân ${s.fullName} (${s.username})?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Vô hiệu hóa'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await getIt<BranchRepository>().deactivateCashier(
+        widget.branchId,
+        s.id,
+      );
+      if (!context.mounted) return;
+      setState(_reloadCashiers);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Đã vô hiệu hóa thu ngân')),
+        );
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              e is DioException
+                  ? (e.response?.data?.toString() ?? e.message ?? 'Lỗi')
+                  : e.toString(),
+            ),
+          ),
+        );
+    }
+  }
+
   bool _canManageManagers(AuthState auth) =>
       auth is AuthAuthenticated && auth.user.role == 'ADMIN';
 
-  /// Chỉ Branch Manager xem danh sách NV kho của chi nhánh mình quản lý (API đã lọc theo branch).
-  bool _canViewBranchInventoryStaff(AuthState auth) =>
-      auth is AuthAuthenticated && auth.user.role == 'BRANCH_MANAGER';
+  /// Admin hoặc Branch Manager (chi nhánh đã được API kiểm tra qua danh sách / detail).
+  bool _canViewBranchOperationalStaff(AuthState auth) =>
+      auth is AuthAuthenticated &&
+      (auth.user.role == 'ADMIN' || auth.user.role == 'BRANCH_MANAGER');
 
-  /// Thêm / vô hiệu NV kho chỉ khi admin đã giao quyền quản lý kho cho chi nhánh.
-  bool _canManageBranchInventoryStaff(AuthState auth, Branch branch) =>
-      _canViewBranchInventoryStaff(auth) &&
-      branch.inventoryDelegatedToManager;
+  /// Admin luôn được thao tác; Branch Manager chỉ khi admin đã giao quyền quản lý nhân sự tại kho.
+  bool _canManageBranchOperationalStaff(AuthState auth, Branch branch) {
+    if (auth is! AuthAuthenticated) return false;
+    if (auth.user.role == 'ADMIN') return true;
+    if (auth.user.role == 'BRANCH_MANAGER') {
+      return branch.inventoryDelegatedToManager;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -557,6 +752,7 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
                   setState(() {
                     _reloadDetail();
                     _staffFuture = null;
+                    _cashiersFuture = null;
                   });
                 },
                 child: const Text('Thử lại'),
@@ -570,16 +766,18 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
     final b = detail.branch;
     final managers = detail.branchManagers;
     final showManagers = _canManageManagers(authState);
-    final showInventorySection = _canViewBranchInventoryStaff(authState);
-    final canManageInventoryStaff =
-        _canManageBranchInventoryStaff(authState, b);
+    final showStaffSection = _canViewBranchOperationalStaff(authState);
+    final canManageOperationalStaff =
+        _canManageBranchOperationalStaff(authState, b);
     _ensureStaffFuture(authState, b);
+    _ensureCashiersFuture(authState, b);
 
     return RefreshIndicator(
       onRefresh: () async {
         setState(() {
           _reloadDetail();
           _staffFuture = null;
+          _cashiersFuture = null;
         });
         await _future;
       },
@@ -699,10 +897,10 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
               ),
             ),
           ],
-          if (showInventorySection) ...[
+          if (showStaffSection) ...[
             const SizedBox(height: 24),
             Text(
-              'Nhân viên kho (Inventory staff)',
+              'Nhân viên kho',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -714,13 +912,14 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (!canManageInventoryStaff)
+                    if (authState is AuthAuthenticated &&
+                        authState.user.role == 'BRANCH_MANAGER' &&
+                        !canManageOperationalStaff)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          'Admin chưa giao quyền quản lý kho cho chi nhánh này. '
-                          'Bạn vẫn xem được danh sách nhân viên tại kho; '
-                          'thêm hoặc vô hiệu hóa khi được giao quyền.',
+                          'Admin chưa giao quyền quản lý nhân sự tại kho cho chi nhánh này. '
+                          'Bạn vẫn xem được danh sách; thêm hoặc vô hiệu hóa khi được giao quyền.',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -761,7 +960,7 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
                                   subtitle: Text(
                                     '${s.username} · ${s.status}',
                                   ),
-                                  trailing: canManageInventoryStaff &&
+                                  trailing: canManageOperationalStaff &&
                                           s.status == 'ACTIVE'
                                       ? IconButton(
                                           icon: const Icon(
@@ -781,12 +980,95 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
                         );
                       },
                     ),
-                    if (canManageInventoryStaff) ...[
+                    if (canManageOperationalStaff) ...[
                       const SizedBox(height: 8),
                       OutlinedButton.icon(
                         onPressed: () => _openAddInventoryStaff(context),
                         icon: const Icon(Icons.add_circle_outline),
                         label: const Text('Thêm nhân viên kho'),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Thu ngân (Cashier)',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FutureBuilder<List<InventoryStaffMember>>(
+                      future: _cashiersFuture,
+                      builder: (context, snap) {
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        if (snap.hasError) {
+                          return Text(
+                            'Không tải được danh sách thu ngân: ${snap.error}',
+                          );
+                        }
+                        final cashiers = snap.data ?? [];
+                        if (cashiers.isEmpty) {
+                          return const Text(
+                            'Chưa có thu ngân tại chi nhánh này.',
+                          );
+                        }
+                        return Column(
+                          children: cashiers
+                              .map(
+                                (s) => ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text(s.fullName),
+                                  subtitle: Text(
+                                    '${s.username} · ${s.status}',
+                                  ),
+                                  trailing: canManageOperationalStaff &&
+                                          s.status == 'ACTIVE'
+                                      ? IconButton(
+                                          icon: const Icon(
+                                            Icons.block_outlined,
+                                          ),
+                                          onPressed: () =>
+                                              _confirmDeactivateCashier(
+                                                context,
+                                                s,
+                                              ),
+                                          tooltip: 'Vô hiệu hóa',
+                                        )
+                                      : null,
+                                ),
+                              )
+                              .toList(),
+                        );
+                      },
+                    ),
+                    if (canManageOperationalStaff) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () => _openAddCashier(context),
+                        icon: const Icon(Icons.point_of_sale_outlined),
+                        label: const Text('Thêm thu ngân'),
                       ),
                     ],
                   ],

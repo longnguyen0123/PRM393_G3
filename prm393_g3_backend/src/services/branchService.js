@@ -19,8 +19,11 @@ import {
   listActiveBranchManagers,
   listInventoryStaffByBranch,
   createInventoryStaffUser,
+  createCashierUser,
   findUserByUsernameLean,
+  listCashiersByBranch,
   setInventoryStaffInactiveInBranch,
+  setCashierInactiveInBranch,
 } from '../repositories/userRepository.js';
 import bcrypt from 'bcrypt';
 
@@ -298,6 +301,87 @@ export const deactivateInventoryStaffForBranch = async (branchId, staffUserId) =
   const updated = await setInventoryStaffInactiveInBranch(staffUserId, branchId);
   if (!updated) {
     const error = new Error('Không tìm thấy nhân viên kho tại chi nhánh này');
+    error.status = 404;
+    throw error;
+  }
+  return updated;
+};
+
+export const getCashiersForBranch = async (branchId) => {
+  if (!mongoose.Types.ObjectId.isValid(branchId)) {
+    const error = new Error('Invalid branch id');
+    error.status = 400;
+    throw error;
+  }
+  const branch = await getBranchById(branchId);
+  if (!branch) {
+    const error = new Error('Branch not found');
+    error.status = 404;
+    throw error;
+  }
+  return listCashiersByBranch(branchId);
+};
+
+export const createCashierForBranch = async (branchId, { username, password, fullName }) => {
+  if (!mongoose.Types.ObjectId.isValid(branchId)) {
+    const error = new Error('Invalid branch id');
+    error.status = 400;
+    throw error;
+  }
+  const branch = await getBranchById(branchId);
+  if (!branch) {
+    const error = new Error('Branch not found');
+    error.status = 404;
+    throw error;
+  }
+  if (!username?.trim() || !password || !fullName?.trim()) {
+    const error = new Error('username, password và fullName là bắt buộc');
+    error.status = 400;
+    throw error;
+  }
+  const exists = await findUserByUsernameLean(username);
+  if (exists) {
+    const error = new Error('Username đã tồn tại');
+    error.status = 409;
+    throw error;
+  }
+  const passwordHash = await bcrypt.hash(password, 10);
+  const created = await createCashierUser({
+    username,
+    passwordHash,
+    fullName,
+    branchId,
+  });
+  if (!created) {
+    const error = new Error('Không tạo được tài khoản');
+    error.status = 400;
+    throw error;
+  }
+  return {
+    _id: created._id,
+    username: created.username,
+    fullName: created.fullName,
+    role: created.role,
+    status: created.status,
+    branchId: created.branchId?.toString?.() ?? created.branchId,
+  };
+};
+
+export const deactivateCashierForBranch = async (branchId, cashierUserId) => {
+  if (!mongoose.Types.ObjectId.isValid(branchId) || !mongoose.Types.ObjectId.isValid(cashierUserId)) {
+    const error = new Error('Invalid id');
+    error.status = 400;
+    throw error;
+  }
+  const branch = await getBranchById(branchId);
+  if (!branch) {
+    const error = new Error('Branch not found');
+    error.status = 404;
+    throw error;
+  }
+  const updated = await setCashierInactiveInBranch(cashierUserId, branchId);
+  if (!updated) {
+    const error = new Error('Không tìm thấy thu ngân tại chi nhánh này');
     error.status = 404;
     throw error;
   }

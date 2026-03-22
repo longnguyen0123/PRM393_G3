@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../branches/data/datasources/branch_remote_datasource.dart';
 import '../../../branches/data/models/branch_model.dart';
@@ -123,7 +124,9 @@ class _AdminCreateUserPageState extends State<AdminCreateUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdminOnlyPage(
+      title: 'Thêm người dùng',
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Thêm người dùng'),
       ),
@@ -282,6 +285,7 @@ class _AdminCreateUserPageState extends State<AdminCreateUserPage> {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -20,33 +20,45 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      drawer: const AppDrawer(),
-      body: _getCurrentPage(),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, -3),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final isAdmin =
+            authState is AuthAuthenticated && authState.user.role == 'ADMIN';
+        return Scaffold(
+          backgroundColor: Colors.grey[100],
+          drawer: const AppDrawer(),
+          body: _getCurrentPage(),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, -3),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home, 'Home', 0),
-              _buildNavItem(Icons.list, 'Products', 1),
-              _buildNavItem(Icons.settings, 'Settings', 2),
-            ],
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(Icons.home, 'Home', 0, isAdmin: isAdmin),
+                  if (isAdmin)
+                    _buildNavItem(Icons.list, 'Products', 1, isAdmin: isAdmin),
+                  _buildNavItem(
+                    Icons.settings,
+                    'Settings',
+                    2,
+                    isAdmin: isAdmin,
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -61,12 +73,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    final isSelected = _currentIndex == index;
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    int index, {
+    required bool isAdmin,
+  }) {
+    final isSelected = isAdmin
+        ? _currentIndex == index
+        : (index == 0 ? _currentIndex == 0 : _currentIndex == 2);
     return InkWell(
       onTap: () {
-        if (index == 1) {
-          // Navigate to Products page
+        if (index == 1 && isAdmin) {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const ProductListPage(),
@@ -147,47 +165,67 @@ class _HomeContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildMenuCard(
-                  context,
-                  icon: Icons.list,
-                  title: 'Products',
-                  subtitle: 'Quản lý sản phẩm',
-                  color: Colors.blue,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ProductListPage(),
-                      ),
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, auth) {
+                    final isAdmin = auth is AuthAuthenticated &&
+                        auth.user.role == 'ADMIN';
+                    if (!isAdmin) return const SizedBox.shrink();
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildMenuCard(
+                          context,
+                          icon: Icons.list,
+                          title: 'Products',
+                          subtitle: 'Quản lý sản phẩm',
+                          color: Colors.blue,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const ProductListPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _buildMenuCard(
+                          context,
+                          icon: Icons.category,
+                          title: 'Product Categories',
+                          subtitle: 'Quản lý thương hiệu và danh mục',
+                          color: Colors.green,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CategoryListPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     );
                   },
                 ),
-                const SizedBox(height: 12),
-                _buildMenuCard(
-                  context,
-                  icon: Icons.category,
-                  title: 'Product Categories',
-                  subtitle: 'Quản lý thương hiệu và danh mục',
-                  color: Colors.green,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const CategoryListPage(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildMenuCard(
-                  context,
-                  icon: Icons.store,
-                  title: 'Branches',
-                  subtitle: 'Quản lý chi nhánh',
-                  color: Colors.orange,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const BranchListPage(),
-                      ),
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, auth) {
+                    final branchSubtitle = auth is AuthAuthenticated &&
+                            auth.user.role == 'BRANCH_MANAGER'
+                        ? 'Chi nhánh bạn đang quản lý'
+                        : 'Quản lý chi nhánh';
+                    return _buildMenuCard(
+                      context,
+                      icon: Icons.store,
+                      title: 'Branches',
+                      subtitle: branchSubtitle,
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const BranchListPage(),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

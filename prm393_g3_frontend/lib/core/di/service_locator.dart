@@ -53,11 +53,7 @@ import '../../features/admin_users/data/admin_user_remote_datasource.dart';
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
-  //localhost
-  //const baseUrl = 'http://localhost:3000/api';
-
-  //emulator
-  const baseUrl = 'http://10.0.2.2:3000/api';
+  final baseUrl = api_config.apiBaseUrl;
 
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);

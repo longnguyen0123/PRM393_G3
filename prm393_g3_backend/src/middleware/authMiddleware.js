@@ -34,7 +34,7 @@ export function authenticate(req, res, next) {
 
     req.user = {
 
-      userId: payload.userId,
+      userId: payload.userId != null ? String(payload.userId) : undefined,
 
       username: payload.username,
 
@@ -217,13 +217,19 @@ export async function requireBranchManagerInventoryStaffRead(req, res, next) {
 
   }
 
+  if (req.user?.role === 'ADMIN') {
+
+    return next();
+
+  }
+
   if (req.user?.role !== 'BRANCH_MANAGER') {
 
     return res.status(403).json({
 
       success: false,
 
-      message: 'Chỉ quản lý chi nhánh xem được danh sách nhân viên kho',
+      message: 'Chỉ quản trị viên hoặc quản lý chi nhánh xem được danh sách nhân viên',
 
     });
 
@@ -303,13 +309,19 @@ export async function requireDelegatedBranchManagerInventoryWrite(req, res, next
 
   }
 
+  if (req.user?.role === 'ADMIN') {
+
+    return next();
+
+  }
+
   if (req.user?.role !== 'BRANCH_MANAGER') {
 
     return res.status(403).json({
 
       success: false,
 
-      message: 'Chỉ quản lý chi nhánh được thao tác nhân viên kho',
+      message: 'Chỉ quản trị viên hoặc quản lý chi nhánh được thao tác nhân viên tại chi nhánh',
 
     });
 

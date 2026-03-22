@@ -8,6 +8,9 @@ import {
   getInventoryStaffForBranch,
   createInventoryStaffForBranch,
   deactivateInventoryStaffForBranch,
+  getCashiersForBranch,
+  createCashierForBranch,
+  deactivateCashierForBranch,
 } from '../services/branchService.js';
 
 export const getBranches = async (req, res, next) => {
@@ -116,6 +119,53 @@ export const deactivateInventoryStaffHandler = async (req, res, next) => {
       success: true,
       data: updated,
       message: 'Đã vô hiệu hóa tài khoản nhân viên kho',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listCashiersHandler = async (req, res, next) => {
+  try {
+    const list = await getCashiersForBranch(req.params.id);
+    res.json({
+      success: true,
+      data: list,
+      message: 'Danh sách thu ngân',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createCashierHandler = async (req, res, next) => {
+  try {
+    const { username, password, fullName } = req.body ?? {};
+    const created = await createCashierForBranch(req.params.id, {
+      username,
+      password,
+      fullName,
+    });
+    res.status(201).json({
+      success: true,
+      data: created,
+      message: 'Đã tạo tài khoản thu ngân',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deactivateCashierHandler = async (req, res, next) => {
+  try {
+    const updated = await deactivateCashierForBranch(
+      req.params.id,
+      req.params.userId,
+    );
+    res.json({
+      success: true,
+      data: updated,
+      message: 'Đã vô hiệu hóa tài khoản thu ngân',
     });
   } catch (err) {
     next(err);

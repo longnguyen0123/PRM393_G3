@@ -23,12 +23,16 @@ export const findBranchManagersByBranchId = async (branchId) => {
 };
 
 export const findUserByIdLean = async (userId) => {
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return null;
+  if (userId == null || userId === '') return null;
+  const id = String(userId);
+  const select = 'username fullName role status branchId managedBranchIds';
+  // Chuẩn Mongo ObjectId
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    const byOid = await User.findById(id).select(select).lean();
+    if (byOid) return byOid;
   }
-  return User.findById(userId)
-    .select('username fullName role status branchId managedBranchIds')
-    .lean();
+  // Legacy / seed: _id là string (vd. "user_admin") — khớp comment trong authController
+  return User.findOne({ _id: id }).select(select).lean();
 };
 
 export const detachBranchFromAllManagers = async (branchId) => {
@@ -132,6 +136,54 @@ export const createInventoryStaffUser = async ({
   } catch {
     return null;
   }
+};
+
+export const listCashiersByBranch = async (branchId) => {
+  const bid = toBranchOid(branchId);
+  if (!bid) return [];
+  return User.find({
+    role: 'CASHIER',
+    branchId: bid,
+  })
+    .select('username fullName role status branchId')
+    .sort({ fullName: 1 })
+    .lean();
+};
+
+export const createCashierUser = async ({
+  username,
+  passwordHash,
+  fullName,
+  branchId,
+}) => {
+  const bid = toBranchOid(branchId);
+  if (!bid) return null;
+  try {
+    return await User.create({
+      username: username.trim(),
+      passwordHash,
+      fullName: fullName.trim(),
+      role: 'CASHIER',
+      branchId: bid,
+      managedBranchIds: [],
+      status: 'ACTIVE',
+    });
+  } catch {
+    return null;
+  }
+};
+
+export const setCashierInactiveInBranch = async (userId, branchId) => {
+  const uid = toBranchOid(userId);
+  const bid = toBranchOid(branchId);
+  if (!uid || !bid) return null;
+  return User.findOneAndUpdate(
+    { _id: uid, role: 'CASHIER', branchId: bid },
+    { $set: { status: 'INACTIVE' } },
+    { new: true, runValidators: true },
+  )
+    .select('username fullName role status branchId')
+    .lean();
 };
 
 export const findUserByUsernameLean = async (username) => {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../bloc/variant_bloc.dart';
 import '../../domain/entities/variant.dart';
@@ -12,7 +13,9 @@ class VariantListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdminOnlyPage(
+      title: 'Variants',
+      child: Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -110,6 +113,7 @@ class VariantListPage extends StatelessWidget {
         },
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 1),
+    ),
     );
   }
 

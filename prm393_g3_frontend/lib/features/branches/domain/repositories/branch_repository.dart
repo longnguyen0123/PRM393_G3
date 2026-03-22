@@ -19,6 +19,15 @@ abstract class BranchRepository {
     required String fullName,
   });
   Future<void> deactivateInventoryStaff(String branchId, String userId);
+  /// Thu ngân (CASHIER) tại chi nhánh — cùng quyền API với nhân viên kho.
+  Future<List<InventoryStaffMember>> getCashiers(String branchId);
+  Future<InventoryStaffMember> createCashier(
+    String branchId, {
+    required String username,
+    required String password,
+    required String fullName,
+  });
+  Future<void> deactivateCashier(String branchId, String userId);
   Future<Branch> createBranch(Branch branch);
   Future<Branch> updateBranch(Branch branch);
 }

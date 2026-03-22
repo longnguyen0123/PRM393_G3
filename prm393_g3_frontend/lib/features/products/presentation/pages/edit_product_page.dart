@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../domain/entities/product.dart';
 import '../../../brands/domain/entities/brand.dart';
 import '../../../brands/presentation/bloc/brand_bloc.dart';
@@ -46,7 +47,9 @@ class _EditProductPageState extends State<EditProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return AdminOnlyPage(
+      title: 'Sửa sản phẩm',
+      child: MultiBlocProvider(
       providers: [
         BlocProvider.value(value: context.read<ProductBloc>()),
         BlocProvider(create: (_) => getIt<BrandBloc>()..add(const BrandRequested())),
@@ -213,6 +216,7 @@ class _EditProductPageState extends State<EditProductPage> {
           },
         ),
       ),
+    ),
     );
   }
 }

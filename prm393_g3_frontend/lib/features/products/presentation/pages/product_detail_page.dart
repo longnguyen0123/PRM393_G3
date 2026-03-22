@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../../domain/entities/product.dart';
 import '../../../variants/presentation/pages/variant_list_page.dart';
@@ -14,7 +15,9 @@ class ProductDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdminOnlyPage(
+      title: 'Product',
+      child: Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -117,6 +120,7 @@ class ProductDetailPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 1),
+    ),
     );
   }
 

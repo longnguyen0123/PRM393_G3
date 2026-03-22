@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/branch.dart';
 import 'branch_detail_page.dart';
 import 'edit_branch_page.dart';
@@ -73,12 +75,19 @@ class _BranchListPageState extends State<BranchListPage> {
         drawer: const AppDrawer(),
         bottomNavigationBar: const BottomNavBar(currentIndex: 0),
 
-        // ADD CREATE BUTTON
-        floatingActionButton: Builder(
-          builder: (pageContext) => FloatingActionButton(
-            onPressed: () => _openCreateBranch(pageContext),
-            child: const Icon(Icons.add),
-          ),
+        floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, auth) {
+            final isAdmin =
+                auth is AuthAuthenticated && auth.user.role == 'ADMIN';
+            if (!isAdmin) return const SizedBox.shrink();
+            return Builder(
+              builder: (pageContext) => FloatingActionButton(
+                onPressed: () => _openCreateBranch(pageContext),
+                tooltip: 'Tạo chi nhánh',
+                child: const Icon(Icons.add),
+              ),
+            );
+          },
         ),
 
         body: Column(
@@ -132,6 +141,9 @@ class _BranchListPageState extends State<BranchListPage> {
                         itemCount: filteredBranches.length,
                         itemBuilder: (context, index) {
                           final branch = filteredBranches[index];
+                          final auth = context.watch<AuthBloc>().state;
+                          final canEditBranch = auth is AuthAuthenticated &&
+                              auth.user.role == 'ADMIN';
 
                           return Card(
                             margin: const EdgeInsets.symmetric(
@@ -168,10 +180,13 @@ class _BranchListPageState extends State<BranchListPage> {
                                             ),
                                           ),
                                         ),
-                                        IconButton(
-                                          onPressed: () => _openEditBranch(context, branch),
-                                          icon: const Icon(Icons.edit_outlined),
-                                        ),
+                                        if (canEditBranch)
+                                          IconButton(
+                                            onPressed: () =>
+                                                _openEditBranch(context, branch),
+                                            icon: const Icon(Icons.edit_outlined),
+                                            tooltip: 'Sửa chi nhánh',
+                                          ),
                                       ],
                                     ),
                                     Text(branch.address),

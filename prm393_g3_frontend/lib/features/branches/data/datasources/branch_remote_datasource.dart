@@ -127,6 +127,49 @@ class BranchRemoteDataSource {
     await apiClient.delete('/branches/$branchId/inventory-staff/$userId');
   }
 
+  Future<List<InventoryStaffMember>> getCashiers(String branchId) async {
+    final response = await apiClient.get('/branches/$branchId/cashiers');
+    final List data = response.data['data'] as List? ?? [];
+    return data.map((e) {
+      final m = Map<String, dynamic>.from(e as Map);
+      return InventoryStaffMember(
+        id: _parseMongoId(m['_id']),
+        username: m['username'] as String? ?? '',
+        fullName: m['fullName'] as String? ?? '',
+        role: m['role'] as String? ?? '',
+        status: m['status'] as String? ?? '',
+      );
+    }).toList();
+  }
+
+  Future<InventoryStaffMember> createCashier(
+    String branchId, {
+    required String username,
+    required String password,
+    required String fullName,
+  }) async {
+    final response = await apiClient.post(
+      '/branches/$branchId/cashiers',
+      data: {
+        'username': username.trim(),
+        'password': password,
+        'fullName': fullName.trim(),
+      },
+    );
+    final m = Map<String, dynamic>.from(response.data['data'] as Map);
+    return InventoryStaffMember(
+      id: _parseMongoId(m['_id']),
+      username: m['username'] as String? ?? '',
+      fullName: m['fullName'] as String? ?? '',
+      role: m['role'] as String? ?? '',
+      status: m['status'] as String? ?? '',
+    );
+  }
+
+  Future<void> deactivateCashier(String branchId, String userId) async {
+    await apiClient.delete('/branches/$branchId/cashiers/$userId');
+  }
+
   Future<BranchModel> createBranch({
     required String name,
     required String address,

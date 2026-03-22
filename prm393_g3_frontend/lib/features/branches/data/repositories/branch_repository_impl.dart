@@ -64,6 +64,31 @@ class BranchRepositoryImpl implements BranchRepository {
   }
 
   @override
+  Future<List<InventoryStaffMember>> getCashiers(String branchId) {
+    return remoteDataSource.getCashiers(branchId);
+  }
+
+  @override
+  Future<InventoryStaffMember> createCashier(
+    String branchId, {
+    required String username,
+    required String password,
+    required String fullName,
+  }) {
+    return remoteDataSource.createCashier(
+      branchId,
+      username: username,
+      password: password,
+      fullName: fullName,
+    );
+  }
+
+  @override
+  Future<void> deactivateCashier(String branchId, String userId) {
+    return remoteDataSource.deactivateCashier(branchId, userId);
+  }
+
+  @override
   Future<Branch> createBranch(Branch branch) async {
     final model = await remoteDataSource.createBranch(
       name: branch.name,

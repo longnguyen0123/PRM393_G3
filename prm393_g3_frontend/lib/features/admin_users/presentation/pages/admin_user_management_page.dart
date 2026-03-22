@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../data/admin_user_remote_datasource.dart';
 import 'admin_create_user_page.dart';
@@ -45,7 +46,9 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdminOnlyPage(
+      title: 'Quản lý người dùng',
+      child: Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Quản lý người dùng'),
@@ -69,6 +72,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage>
           _InventoryStaffTab(key: ValueKey('is$_listVersion')),
         ],
       ),
+    ),
     );
   }
 }
