@@ -20,17 +20,30 @@ class _AuthWrapperState extends State<AuthWrapper> {
     context.read<AuthBloc>().add(AuthCheckRequested());
   }
 
+  /// Gỡ mọi route đè lên [home] (Products, Branches, …) sau khi đăng xuất.
+  void _popAllOverlayRoutes() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final nav = Navigator.maybeOf(context, rootNavigator: true);
+      if (nav == null) {
+        return;
+      }
+      if (!nav.canPop()) {
+        return;
+      }
+      nav.popUntil((route) => route.isFirst);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
           previous is AuthAuthenticated && current is AuthUnauthenticated,
       listener: (context, state) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          Navigator.of(context, rootNavigator: true)
-              .popUntil((route) => route.isFirst);
-        });
+        _popAllOverlayRoutes();
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {

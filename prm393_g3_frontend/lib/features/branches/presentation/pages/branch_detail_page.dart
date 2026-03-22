@@ -234,6 +234,9 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
   Future<List<InventoryStaffMember>>? _staffFuture;
   Future<List<InventoryStaffMember>>? _cashiersFuture;
 
+  /// Sau khi sửa chi nhánh từ màn này, cần báo danh sách chi nhánh để gọi refresh.
+  bool _pendingBranchListRefresh = false;
+
   @override
   void initState() {
     super.initState();
@@ -292,6 +295,7 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
     if (!context.mounted) return;
     if (result == 'updated') {
       setState(() {
+        _pendingBranchListRefresh = true;
         _reloadDetail();
         _staffFuture = null;
         _cashiersFuture = null;
@@ -708,18 +712,40 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
             final canEditBranch = detail != null &&
                 authState is AuthAuthenticated &&
                 authState.user.role == 'ADMIN';
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(title),
-                actions: [
-                  if (canEditBranch)
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      onPressed: () => _openEdit(context, detail),
-                    ),
-                ],
+            return PopScope(
+              canPop: !_pendingBranchListRefresh,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) {
+                  return;
+                }
+                if (!context.mounted) {
+                  return;
+                }
+                Navigator.of(context).pop('updated');
+              },
+              child: Scaffold(
+                appBar: AppBar(
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      if (_pendingBranchListRefresh) {
+                        Navigator.of(context).pop('updated');
+                      } else {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                  title: Text(title),
+                  actions: [
+                    if (canEditBranch)
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined),
+                        onPressed: () => _openEdit(context, detail),
+                      ),
+                  ],
+                ),
+                body: _buildBody(context, snapshot, authState),
               ),
-              body: _buildBody(context, snapshot, authState),
             );
           },
         );
