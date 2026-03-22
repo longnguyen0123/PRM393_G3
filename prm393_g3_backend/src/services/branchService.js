@@ -1,12 +1,17 @@
+import mongoose from 'mongoose';
 import {
   getAllBranches,
+  getBranchById,
   createBranch as createBranchRepository,
   updateBranchById,
   deleteBranchById,
 } from '../repositories/branchRepository.js';
 
-import { getTotalStockByBranch }
-  from '../repositories/inventoryRepository.js';
+import {
+  getTotalStockByBranch,
+  getInventoryLinesWithProductsForBranch,
+} from '../repositories/inventoryRepository.js';
+import { findBranchManagerByBranchId } from '../repositories/userRepository.js';
 
 export const getAllBranchesWithStock = async () => {
   const branches = await getAllBranches();
@@ -49,4 +54,39 @@ export const deleteBranch = async (id) => {
   }
 
   return deleted;
+};
+
+export const getBranchDetail = async (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const error = new Error('Invalid branch id');
+    error.status = 400;
+    throw error;
+  }
+
+  const branch = await getBranchById(id);
+  if (!branch) {
+    const error = new Error('Branch not found');
+    error.status = 404;
+    throw error;
+  }
+
+  const stockData = await getTotalStockByBranch();
+  const stockMap = {};
+  stockData.forEach((item) => {
+    stockMap[String(item._id)] = item.totalItemsInStock;
+  });
+
+  const [branchManager, inventoryLines] = await Promise.all([
+    findBranchManagerByBranchId(id),
+    getInventoryLinesWithProductsForBranch(id),
+  ]);
+
+  return {
+    branch: {
+      ...branch,
+      totalItemsInStock: stockMap[String(branch._id)] || 0,
+    },
+    branchManager,
+    inventoryLines,
+  };
 };

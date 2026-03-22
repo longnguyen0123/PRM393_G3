@@ -1,0 +1,15 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334415" },
+    "type": "IN",
+    "fromBranchId": null,
+    "toBranchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "createdBy": { "$oid": "673c1f1e1d1c001122334406" },
+    "createdAt": "2026-02-01T10:00:00Z",
+    "note": "Initial stock import",
+    "items": [
+      { "variantId": { "$oid": "673c1f1e1d1c00112233440f" }, "quantity": 10 },
+      { "variantId": { "$oid": "673c1f1e1d1c001122334410" }, "quantity": 7 }
+    ]
+  }
+]

@@ -4,6 +4,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../domain/entities/branch.dart';
+import 'branch_detail_page.dart';
 import 'edit_branch_page.dart';
 import '../bloc/branch_bloc.dart';
 import '../bloc/branch_event.dart';
@@ -138,7 +139,20 @@ class _BranchListPageState extends State<BranchListPage> {
                                 horizontal: 12, vertical: 6),
                             child: InkWell(
                               borderRadius: BorderRadius.circular(12),
-                              onTap: () => _openEditBranch(context, branch),
+                              onTap: () async {
+                                final result = await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => BranchDetailPage(
+                                      branchId: branch.id,
+                                      titleFallback: branch.name,
+                                    ),
+                                  ),
+                                );
+                                if (!context.mounted) return;
+                                if (result == 'deleted') {
+                                  context.read<BranchBloc>().add(BranchRequested());
+                                }
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.all(12),
                                 child: Column(

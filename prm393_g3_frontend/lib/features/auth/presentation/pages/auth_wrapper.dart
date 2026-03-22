@@ -22,20 +22,31 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state is AuthLoading || state is AuthInitial) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (state is AuthAuthenticated) {
-          return const HomePage();
-        }
-        return const LoginPage();
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous is AuthAuthenticated && current is AuthUnauthenticated,
+      listener: (context, state) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          Navigator.of(context, rootNavigator: true)
+              .popUntil((route) => route.isFirst);
+        });
       },
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state is AuthLoading || state is AuthInitial) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          if (state is AuthAuthenticated) {
+            return const HomePage();
+          }
+          return const LoginPage();
+        },
+      ),
     );
   }
 }

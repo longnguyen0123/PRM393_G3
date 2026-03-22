@@ -1,0 +1,19 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334414" },
+    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "cashierId": { "$oid": "673c1f1e1d1c001122334405" },
+    "createdAt": "2026-02-15T14:30:00Z",
+    "paymentMethod": "CASH",
+    "status": "COMPLETED",
+    "totalAmount": 35000000,
+    "items": [
+      {
+        "variantId": { "$oid": "673c1f1e1d1c00112233440f" },
+        "quantity": 1,
+        "unitPrice": 35000000,
+        "lineTotal": 35000000
+      }
+    ]
+  }
+]

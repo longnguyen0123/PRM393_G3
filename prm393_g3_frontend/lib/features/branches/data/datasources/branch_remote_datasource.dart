@@ -1,4 +1,5 @@
 import '../../../../core/network/api_client.dart';
+import '../models/branch_detail_model.dart';
 import '../models/branch_model.dart';
 
 class BranchRemoteDataSource {
@@ -12,6 +13,12 @@ class BranchRemoteDataSource {
     final List data = response.data['data'];
 
     return data.map((e) => BranchModel.fromJson(e)).toList();
+  }
+
+  Future<BranchDetailModel> getBranchDetail(String id) async {
+    final response = await apiClient.get('/branches/$id/detail');
+    final data = response.data['data'] as Map<String, dynamic>;
+    return BranchDetailModel.fromJson(data);
   }
 
   Future<BranchModel> createBranch({

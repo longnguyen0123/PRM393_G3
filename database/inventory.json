@@ -1,0 +1,30 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334411" },
+    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "variantId": { "$oid": "673c1f1e1d1c00112233440f" },
+    "quantity": 10,
+    "reorderLevel": 2
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334412" },
+    "branchId": { "$oid": "673c1f1e1d1c001122334402" },
+    "variantId": { "$oid": "673c1f1e1d1c00112233440f" },
+    "quantity": 5,
+    "reorderLevel": 2
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334413" },
+    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "variantId": { "$oid": "673c1f1e1d1c001122334410" },
+    "quantity": 7,
+    "reorderLevel": 1
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334414" },
+    "branchId": { "$oid": "673c1f1e1d1c001122334402" },
+    "variantId": { "$oid": "673c1f1e1d1c001122334410" },
+    "quantity": 3,
+    "reorderLevel": 1
+  }
+]

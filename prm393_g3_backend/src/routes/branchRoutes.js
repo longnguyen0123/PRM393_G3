@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getBranches,
+  getBranchDetailHandler,
   createBranchHandler,
   updateBranchHandler,
   deleteBranchHandler,
@@ -9,6 +10,7 @@ import {
 const router = express.Router();
 
 router.get('/', getBranches);
+router.get('/:id/detail', getBranchDetailHandler);
 router.post('/', createBranchHandler);
 router.put('/:id', updateBranchHandler);
 router.delete('/:id', deleteBranchHandler);

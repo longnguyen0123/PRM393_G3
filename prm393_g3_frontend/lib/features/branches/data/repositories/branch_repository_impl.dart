@@ -1,4 +1,5 @@
 import '../../domain/entities/branch.dart';
+import '../../domain/entities/branch_detail.dart';
 import '../../domain/repositories/branch_repository.dart';
 import '../datasources/branch_remote_datasource.dart';
 
@@ -10,6 +11,11 @@ class BranchRepositoryImpl implements BranchRepository {
   @override
   Future<List<Branch>> getBranches() async {
     return await remoteDataSource.getBranches();
+  }
+
+  @override
+  Future<BranchDetail> getBranchDetail(String id) async {
+    return await remoteDataSource.getBranchDetail(id);
   }
 
   @override

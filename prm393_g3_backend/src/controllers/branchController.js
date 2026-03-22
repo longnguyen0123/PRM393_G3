@@ -1,5 +1,6 @@
 import {
   getAllBranchesWithStock,
+  getBranchDetail,
   createBranch,
   updateBranch,
   deleteBranch,
@@ -12,6 +13,19 @@ export const getBranches = async (req, res, next) => {
       success: true,
       data: branches,
       message: 'Branches fetched successfully'
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getBranchDetailHandler = async (req, res, next) => {
+  try {
+    const detail = await getBranchDetail(req.params.id);
+    res.json({
+      success: true,
+      data: detail,
+      message: 'Branch detail fetched successfully',
     });
   } catch (err) {
     next(err);

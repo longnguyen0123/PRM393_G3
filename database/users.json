@@ -1,0 +1,47 @@
+[
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334403" },
+    "username": "admin",
+    "passwordHash": "hashed_password",
+    "fullName": "System Administrator",
+    "role": "ADMIN",
+    "branchId": null,
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334404" },
+    "username": "manager_hn",
+    "passwordHash": "hashed_password",
+    "fullName": "Branch Manager Hanoi",
+    "role": "BRANCH_MANAGER",
+    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334417" },
+    "username": "manager_hcm",
+    "passwordHash": "hashed_password",
+    "fullName": "Branch Manager HCM",
+    "role": "BRANCH_MANAGER",
+    "branchId": { "$oid": "673c1f1e1d1c001122334402" },
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334405" },
+    "username": "cashier_hn",
+    "passwordHash": "hashed_password",
+    "fullName": "Cashier Hanoi",
+    "role": "CASHIER",
+    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334406" },
+    "username": "inventory_hn",
+    "passwordHash": "hashed_password",
+    "fullName": "Inventory Staff Hanoi",
+    "role": "INVENTORY_STAFF",
+    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "status": "ACTIVE"
+  }
+]
