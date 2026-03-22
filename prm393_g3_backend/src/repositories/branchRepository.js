@@ -22,7 +22,3 @@ export const updateBranchById = async (id, data) => {
     runValidators: true,
   }).lean();
 };
-
-export const deleteBranchById = async (id) => {
-  return await Branch.findByIdAndDelete(id).lean();
-};

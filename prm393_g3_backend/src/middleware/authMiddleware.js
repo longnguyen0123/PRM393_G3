@@ -78,7 +78,18 @@ export function requireAdmin(req, res, next) {
 
 }
 
+/** Danh mục & thương hiệu: ADMIN, quản lý chi nhánh, nhân viên kho. */
+const CATALOG_EDIT_ROLES = ['ADMIN', 'BRANCH_MANAGER', 'INVENTORY_STAFF'];
 
+export function requireCatalogEditor(req, res, next) {
+  if (!CATALOG_EDIT_ROLES.includes(req.user?.role)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Bạn không có quyền thêm hoặc sửa danh mục / thương hiệu',
+    });
+  }
+  next();
+}
 
 /**
 

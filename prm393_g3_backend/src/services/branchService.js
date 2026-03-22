@@ -4,7 +4,6 @@ import {
   getBranchById,
   createBranch as createBranchRepository,
   updateBranchById,
-  deleteBranchById,
 } from '../repositories/branchRepository.js';
 
 import {
@@ -94,18 +93,6 @@ export const updateBranch = async (id, data) => {
   }
 
   return updated;
-};
-
-export const deleteBranch = async (id) => {
-  const deleted = await deleteBranchById(id);
-
-  if (!deleted) {
-    const error = new Error('Branch not found');
-    error.status = 404;
-    throw error;
-  }
-
-  return deleted;
 };
 
 export const getBranchDetail = async (id) => {

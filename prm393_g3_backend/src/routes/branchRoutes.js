@@ -6,7 +6,6 @@ import {
   assignBranchManagerHandler,
   createBranchHandler,
   updateBranchHandler,
-  deleteBranchHandler,
   listInventoryStaffHandler,
   createInventoryStaffHandler,
   deactivateInventoryStaffHandler,
@@ -57,6 +56,5 @@ router.get('/:id/manager-candidates', ...adminOnly, getBranchManagerCandidatesHa
 router.patch('/:id/branch-manager', ...adminOnly, assignBranchManagerHandler);
 router.post('/', ...adminOnly, createBranchHandler);
 router.put('/:id', ...adminOnly, updateBranchHandler);
-router.delete('/:id', ...adminOnly, deleteBranchHandler);
 
 export default router;

@@ -177,12 +177,7 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
       ),
     );
     if (!context.mounted) return;
-    if (result is String &&
-        (result == 'updated' || result == 'deleted')) {
-      if (result == 'deleted') {
-        Navigator.of(context).pop(result);
-        return;
-      }
+    if (result == 'updated') {
       setState(() {
         _reloadDetail();
         _staffFuture = null;
@@ -190,12 +185,8 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          SnackBar(
-            content: Text(
-              result == 'updated'
-                  ? 'Branch updated successfully'
-                  : 'Branch deleted successfully',
-            ),
+          const SnackBar(
+            content: Text('Branch updated successfully'),
           ),
         );
     }

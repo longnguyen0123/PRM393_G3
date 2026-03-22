@@ -27,12 +27,3 @@ class BranchUpdateRequested extends BranchEvent {
   @override
   List<Object?> get props => [branch];
 }
-
-class BranchDeleteRequested extends BranchEvent {
-  final String branchId;
-
-  const BranchDeleteRequested(this.branchId);
-
-  @override
-  List<Object?> get props => [branchId];
-}

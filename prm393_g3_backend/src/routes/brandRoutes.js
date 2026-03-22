@@ -1,10 +1,10 @@
 import express from 'express';
 import Brand from '../models/brand.js';
-import { authenticate, requireAdmin } from '../middleware/authMiddleware.js';
+import { authenticate, requireCatalogEditor } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-const adminOnly = [authenticate, requireAdmin];
+const catalogEditor = [authenticate, requireCatalogEditor];
 
 // GET /api/brands
 router.get('/', async (_req, res) => {
@@ -20,7 +20,7 @@ router.get('/', async (_req, res) => {
 });
 
 // POST /api/brands
-router.post('/', ...adminOnly, async (req, res) => {
+router.post('/', ...catalogEditor, async (req, res) => {
   try {
     const { name, status } = req.body ?? {};
     if (typeof name !== 'string' || !name.trim()) {
@@ -39,7 +39,7 @@ router.post('/', ...adminOnly, async (req, res) => {
 });
 
 // PATCH /api/brands/:id
-router.patch('/:id', ...adminOnly, async (req, res) => {
+router.patch('/:id', ...catalogEditor, async (req, res) => {
   try {
     const { name, status } = req.body ?? {};
     const updates = {};

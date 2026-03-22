@@ -5,7 +5,6 @@ import {
   assignBranchManager,
   createBranch,
   updateBranch,
-  deleteBranch,
   getInventoryStaffForBranch,
   createInventoryStaffForBranch,
   deactivateInventoryStaffForBranch,
@@ -149,14 +148,3 @@ export const updateBranchHandler = async (req, res, next) => {
   }
 };
 
-export const deleteBranchHandler = async (req, res, next) => {
-  try {
-    await deleteBranch(req.params.id);
-    res.json({
-      success: true,
-      message: 'Branch deleted successfully'
-    });
-  } catch (err) {
-    next(err);
-  }
-};

@@ -21,5 +21,4 @@ abstract class BranchRepository {
   Future<void> deactivateInventoryStaff(String branchId, String userId);
   Future<Branch> createBranch(Branch branch);
   Future<Branch> updateBranch(Branch branch);
-  Future<void> deleteBranch(String id);
 }

@@ -32,7 +32,6 @@ class _BranchListPageState extends State<BranchListPage> {
     final message = switch (action) {
       'created' => 'Branch created successfully',
       'updated' => 'Branch updated successfully',
-      'deleted' => 'Branch deleted successfully',
       _ => null,
     };
 
@@ -149,7 +148,7 @@ class _BranchListPageState extends State<BranchListPage> {
                                   ),
                                 );
                                 if (!context.mounted) return;
-                                if (result == 'deleted') {
+                                if (result == 'updated') {
                                   context.read<BranchBloc>().add(BranchRequested());
                                 }
                               },

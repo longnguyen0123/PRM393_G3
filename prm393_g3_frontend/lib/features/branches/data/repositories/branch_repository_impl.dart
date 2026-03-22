@@ -85,9 +85,4 @@ class BranchRepositoryImpl implements BranchRepository {
     );
     return model;
   }
-
-  @override
-  Future<void> deleteBranch(String id) async {
-    await remoteDataSource.deleteBranch(id);
-  }
 }

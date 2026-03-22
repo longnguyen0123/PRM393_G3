@@ -64,16 +64,22 @@ class _CategoryListPageState extends State<CategoryListPage> {
               },
             ),
           ],
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                _buildBrandsSection(context),
-                const SizedBox(height: 16),
-                _buildCategoriesSection(context),
-              ],
-            ),
+          child: Builder(
+            builder: (nestedContext) {
+              // Context from State.build is above MultiBlocProvider; use a Builder
+              // below the providers so Add / dialog can read BrandBloc & CategoryBloc.
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildBrandsSection(nestedContext),
+                    const SizedBox(height: 16),
+                    _buildCategoriesSection(nestedContext),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

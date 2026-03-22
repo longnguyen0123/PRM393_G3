@@ -73,45 +73,6 @@ class _EditBranchPageState extends State<EditBranchPage> {
               title: const Text('Edit Branch'),
               actions: [
                 IconButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          final branchBloc = context.read<BranchBloc>();
-                          final shouldDelete = await showDialog<bool>(
-                            context: context,
-                            builder: (dialogContext) => AlertDialog(
-                              title: const Text('Delete Branch'),
-                              content: Text(
-                                'Are you sure you want to delete ${widget.branch.name}?',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop(false);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop(true);
-                                  },
-                                  child: const Text('Delete'),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (shouldDelete == true && mounted) {
-                            _pendingAction = 'deleted';
-                            branchBloc.add(
-                                  BranchDeleteRequested(widget.branch.id),
-                                );
-                          }
-                        },
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Delete Branch',
-                ),
-                IconButton(
                   onPressed: () {},
                   icon: const Icon(Icons.account_circle_outlined),
                 ),
@@ -158,10 +119,13 @@ class _EditBranchPageState extends State<EditBranchPage> {
                               ),
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
+                                key: ValueKey(_status),
                                 initialValue: _status,
                                 decoration: const InputDecoration(
                                   labelText: 'Branch Status',
                                   border: OutlineInputBorder(),
+                                  helperText:
+                                      'Chọn Inactive để ngưng hoạt động chi nhánh (không xóa dữ liệu).',
                                 ),
                                 items: const [
                                   DropdownMenuItem(
@@ -174,8 +138,9 @@ class _EditBranchPageState extends State<EditBranchPage> {
                                   ),
                                 ],
                                 onChanged: (value) {
+                                  if (value == null) return;
                                   setState(() {
-                                    _status = value!;
+                                    _status = value;
                                   });
                                 },
                               ),
