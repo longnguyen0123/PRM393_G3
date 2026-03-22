@@ -49,6 +49,7 @@ import '../../features/categories/domain/usecases/get_categories_usecase.dart';
 import '../../features/categories/domain/usecases/update_category.dart';
 import '../../features/categories/presentation/bloc/category_bloc.dart';
 import '../../features/admin_users/data/admin_user_remote_datasource.dart';
+import '../../features/stock_transfers/data/stock_transfer_remote_datasource.dart';
 
 final getIt = GetIt.instance;
 
@@ -178,5 +179,9 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<AdminUserRemoteDataSource>(
     () => AdminUserRemoteDataSource(getIt()),
+  );
+
+  getIt.registerLazySingleton<StockTransferRemoteDataSource>(
+    () => StockTransferRemoteDataSource(getIt()),
   );
 }

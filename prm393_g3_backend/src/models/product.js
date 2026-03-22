@@ -4,8 +4,8 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     // Use string codes like "brand_001", "category_001" to match existing data
-    brandId: { type: String, ref: 'brand', required: true },
-    categoryId: { type: String, ref: 'categories', required: true },
+    brandId: { type:  mongoose.Schema.Types.ObjectId, ref: 'brand', required: true },
+    categoryId: { type:  mongoose.Schema.Types.ObjectId, ref: 'categories', required: true },
     description: { type: String },
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
   },

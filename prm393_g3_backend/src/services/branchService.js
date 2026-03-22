@@ -32,13 +32,13 @@ export const getAllBranchesWithStock = async () => {
   const stockData = await getTotalStockByBranch();
 
   const stockMap = {};
-  stockData.forEach(item => {
+  stockData.forEach((item) => {
     stockMap[item._id] = item.totalItemsInStock;
   });
 
-  return branches.map(branch => ({
+  return branches.map((branch) => ({
     ...branch,
-    totalItemsInStock: stockMap[branch._id] || 0
+    totalItemsInStock: stockMap[String(branch._id)] || 0,
   }));
 };
 
@@ -79,6 +79,55 @@ export const getBranchesWithStockForRequester = async (authUser) => {
     const bid = String(user.branchId);
     return all.filter((b) => String(b._id) === bid);
   }
+  return [];
+};
+
+/**
+ * Chi nhánh có thể chọn làm đích khi lập/sửa phiếu chuyển (ACTIVE).
+ * NV kho: mọi chi nhánh trừ chi nhánh mình. Quản lý: chi nhánh được quản lý. Admin: tất cả.
+ */
+export const getBranchesForTransferDestination = async (authUser) => {
+  if (!authUser?.userId) {
+    const error = new Error('Unauthorized');
+    error.status = 401;
+    throw error;
+  }
+  const user = await findUserByIdLean(authUser.userId);
+  if (!user || user.status !== 'ACTIVE') {
+    const error = new Error('Unauthorized');
+    error.status = 401;
+    throw error;
+  }
+
+  const all = await getAllBranches();
+  const active = all.filter((b) => b.status === 'ACTIVE');
+
+  if (user.role === 'INVENTORY_STAFF') {
+    if (!user.branchId) {
+      return [];
+    }
+    const bid = String(user.branchId);
+    return active
+      .filter((b) => String(b._id) !== bid)
+      .map((b) => ({ _id: b._id, name: b.name, address: b.address }));
+  }
+
+  if (user.role === 'BRANCH_MANAGER') {
+    const allowed = new Set(
+      (user.managedBranchIds || []).map((id) => String(id)),
+    );
+    if (user.branchId) {
+      allowed.add(String(user.branchId));
+    }
+    return active
+      .filter((b) => allowed.has(String(b._id)))
+      .map((b) => ({ _id: b._id, name: b.name, address: b.address }));
+  }
+
+  if (user.role === 'ADMIN') {
+    return active.map((b) => ({ _id: b._id, name: b.name, address: b.address }));
+  }
+
   return [];
 };
 
