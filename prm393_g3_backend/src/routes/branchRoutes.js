@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getBranches,
+  getTransferDestinationBranchesHandler,
   getBranchDetailHandler,
   getBranchManagerCandidatesHandler,
   assignBranchManagerHandler,
@@ -34,6 +35,7 @@ const branchManagerInventoryWrite = [
 ];
 
 router.get('/', authenticate, getBranches);
+router.get('/transfer-destinations', authenticate, getTransferDestinationBranchesHandler);
 router.get(
   '/:id/detail',
   authenticate,

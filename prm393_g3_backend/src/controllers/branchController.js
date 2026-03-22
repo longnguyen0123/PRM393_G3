@@ -1,5 +1,6 @@
 import {
   getBranchesWithStockForRequester,
+  getBranchesForTransferDestination,
   getBranchDetail,
   getBranchManagerCandidates,
   assignBranchManager,
@@ -20,6 +21,25 @@ export const getBranches = async (req, res, next) => {
       success: true,
       data: branches,
       message: 'Branches fetched successfully'
+    });
+  } catch (err) {
+    if (err.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: 'Phiên đăng nhập không hợp lệ',
+      });
+    }
+    next(err);
+  }
+};
+
+export const getTransferDestinationBranchesHandler = async (req, res, next) => {
+  try {
+    const branches = await getBranchesForTransferDestination(req.user);
+    res.json({
+      success: true,
+      data: branches,
+      message: 'Danh sách chi nhánh đích',
     });
   } catch (err) {
     if (err.status === 401) {

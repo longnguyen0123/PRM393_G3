@@ -7,6 +7,7 @@ import '../../../admin_users/presentation/pages/admin_user_management_page.dart'
 import '../../../products/presentation/pages/product_list_page.dart';
 import '../../../categories/presentation/pages/category_list_page.dart';
 import '../../../branches/presentation/pages/branch_list_page.dart';
+import '../../../stock_transfers/presentation/pages/transfer_list_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -226,6 +227,40 @@ class _HomeContent extends StatelessWidget {
                           ),
                         );
                       },
+                    );
+                  },
+                ),
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, auth) {
+                    final ok = auth is AuthAuthenticated &&
+                        [
+                          'INVENTORY_STAFF',
+                          'BRANCH_MANAGER',
+                          'ADMIN',
+                        ].contains(auth.user.role);
+                    if (!ok) return const SizedBox.shrink();
+                    final subtitle = auth.user.role == 'INVENTORY_STAFF'
+                        ? 'Tạo phiếu và xem trạng thái'
+                        : 'Duyệt hoặc từ chối phiếu nhân viên kho';
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildMenuCard(
+                          context,
+                          icon: Icons.swap_horiz,
+                          title: 'Phiếu chuyển kho',
+                          subtitle: subtitle,
+                          color: Colors.teal,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const TransferListPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     );
                   },
                 ),
