@@ -28,7 +28,9 @@ import '../../features/branches/domain/usecases/update_branch.dart';
 import '../../features/variants/data/datasources/variant_remote_data_source.dart';
 import '../../features/variants/data/repositories/variant_repository_impl.dart';
 import '../../features/variants/domain/repositories/variant_repository.dart';
+import '../../features/variants/domain/usecases/create_variant_usecase.dart';
 import '../../features/variants/domain/usecases/get_variants_usecase.dart';
+import '../../features/variants/domain/usecases/update_variant_usecase.dart';
 import '../../features/variants/presentation/bloc/variant_bloc.dart';
 
 // ===== Brand Feature Imports =====
@@ -130,6 +132,12 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<GetVariantsUseCase>(
       () => GetVariantsUseCase(repository: getIt()),
+    )
+    ..registerLazySingleton<CreateVariantUseCase>(
+      () => CreateVariantUseCase(repository: getIt()),
+    )
+    ..registerLazySingleton<UpdateVariantUseCase>(
+      () => UpdateVariantUseCase(repository: getIt()),
     )
     ..registerFactory<VariantBloc>(
       () => VariantBloc(getVariantsUseCase: getIt()),

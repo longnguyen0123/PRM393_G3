@@ -1078,9 +1078,16 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
           ],
           const SizedBox(height: 24),
           Text(
-            'Sản phẩm trong chi nhánh (theo tồn kho)',
+            'Tồn kho theo variant',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Mỗi dòng là một SKU (variant) và số lượng tại chi nhánh.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           const SizedBox(height: 8),
@@ -1093,27 +1100,59 @@ class _BranchDetailPageState extends State<BranchDetailPage> {
             )
           else
             ...detail.products.map((line) {
+              final sku = line.sku ?? '—';
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Text(
+                          '${line.quantity}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   title: Text(
-                    line.productName ?? line.sku ?? 'Sản phẩm',
+                    sku,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        'Số lượng tồn: ${line.quantity}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      if (line.productName != null &&
+                          line.productName!.isNotEmpty)
+                        Text('Sản phẩm: ${line.productName}'),
                       if (line.productDescription != null &&
                           line.productDescription!.isNotEmpty)
                         Text(line.productDescription!),
                       const SizedBox(height: 4),
-                      Text('SKU: ${line.sku ?? "—"}'),
                       if (line.barcode != null)
                         Text('Barcode: ${line.barcode}'),
-                      Text(
-                        'SL: ${line.quantity}  |  Mức đặt lại: ${line.reorderLevel}',
-                      ),
+                      Text('Mức đặt lại: ${line.reorderLevel}'),
                       Text('Giá niêm yết: ${_formatVnd(line.price)}'),
+                      if (line.variantStatus != null &&
+                          line.variantStatus!.isNotEmpty)
+                        Text('Trạng thái variant: ${line.variantStatus}'),
                     ],
                   ),
                   isThreeLine: true,
