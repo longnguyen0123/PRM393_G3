@@ -24,6 +24,7 @@ class _EditBranchPageState extends State<EditBranchPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
   late String _status;
+  late bool _inventoryDelegatedToManager;
   String? _pendingAction;
 
   @override
@@ -32,6 +33,7 @@ class _EditBranchPageState extends State<EditBranchPage> {
     _nameController = TextEditingController(text: widget.branch.name);
     _addressController = TextEditingController(text: widget.branch.address);
     _status = widget.branch.status;
+    _inventoryDelegatedToManager = widget.branch.inventoryDelegatedToManager;
   }
 
   @override
@@ -177,6 +179,20 @@ class _EditBranchPageState extends State<EditBranchPage> {
                                   });
                                 },
                               ),
+                              const SizedBox(height: 16),
+                              SwitchListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Giao quản lý kho cho Branch Manager'),
+                                subtitle: const Text(
+                                  'Khi bật, Branch Manager được phép thêm / vô hiệu hóa nhân viên kho tại chi nhánh này.',
+                                ),
+                                value: _inventoryDelegatedToManager,
+                                onChanged: (v) {
+                                  setState(() {
+                                    _inventoryDelegatedToManager = v;
+                                  });
+                                },
+                              ),
                             ],
                           ),
                         ),
@@ -195,6 +211,8 @@ class _EditBranchPageState extends State<EditBranchPage> {
                                         status: _status,
                                         totalItemsInStock:
                                             widget.branch.totalItemsInStock,
+                                        inventoryDelegatedToManager:
+                                            _inventoryDelegatedToManager,
                                       );
 
                                       _pendingAction = 'updated';

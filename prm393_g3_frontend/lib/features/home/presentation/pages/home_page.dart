@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../admin_users/presentation/pages/admin_user_management_page.dart';
 import '../../../products/presentation/pages/product_list_page.dart';
 import '../../../categories/presentation/pages/category_list_page.dart';
 import '../../../branches/presentation/pages/branch_list_page.dart';
@@ -184,6 +188,35 @@ class _HomeContent extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => const BranchListPage(),
                       ),
+                    );
+                  },
+                ),
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is! AuthAuthenticated ||
+                        state.user.role != 'ADMIN') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildMenuCard(
+                          context,
+                          icon: Icons.people_outline,
+                          title: 'Quản lý người dùng',
+                          subtitle: 'Branch Manager & Inventory Staff',
+                          color: Colors.purple,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const AdminUserManagementPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     );
                   },
                 ),

@@ -6,24 +6,20 @@
     "fullName": "System Administrator",
     "role": "ADMIN",
     "branchId": null,
+    "managedBranchIds": [],
     "status": "ACTIVE"
   },
   {
     "_id": { "$oid": "673c1f1e1d1c001122334404" },
     "username": "manager_hn",
     "passwordHash": "hashed_password",
-    "fullName": "Branch Manager Hanoi",
+    "fullName": "Regional Branch Manager",
     "role": "BRANCH_MANAGER",
-    "branchId": { "$oid": "673c1f1e1d1c001122334401" },
-    "status": "ACTIVE"
-  },
-  {
-    "_id": { "$oid": "673c1f1e1d1c001122334417" },
-    "username": "manager_hcm",
-    "passwordHash": "hashed_password",
-    "fullName": "Branch Manager HCM",
-    "role": "BRANCH_MANAGER",
-    "branchId": { "$oid": "673c1f1e1d1c001122334402" },
+    "branchId": null,
+    "managedBranchIds": [
+      { "$oid": "673c1f1e1d1c001122334401" },
+      { "$oid": "673c1f1e1d1c001122334402" }
+    ],
     "status": "ACTIVE"
   },
   {
@@ -33,6 +29,7 @@
     "fullName": "Cashier Hanoi",
     "role": "CASHIER",
     "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "managedBranchIds": [],
     "status": "ACTIVE"
   },
   {
@@ -42,6 +39,31 @@
     "fullName": "Inventory Staff Hanoi",
     "role": "INVENTORY_STAFF",
     "branchId": { "$oid": "673c1f1e1d1c001122334401" },
+    "managedBranchIds": [],
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334407" },
+    "username": "manager_hcm",
+    "passwordHash": "hashed_password",
+    "fullName": "Branch Manager Ho Chi Minh",
+    "role": "BRANCH_MANAGER",
+    "branchId": null,
+    "managedBranchIds": [
+      { "$oid": "673c1f1e1d1c001122334402" }
+    ],
+    "status": "ACTIVE"
+  },
+  {
+    "_id": { "$oid": "673c1f1e1d1c001122334408" },
+    "username": "manager_hn2",
+    "passwordHash": "hashed_password",
+    "fullName": "Branch Manager Hanoi 2",
+    "role": "BRANCH_MANAGER",
+    "branchId": null,
+    "managedBranchIds": [
+      { "$oid": "673c1f1e1d1c001122334401" }
+    ],
     "status": "ACTIVE"
   }
 ]

@@ -14,7 +14,7 @@ String _parseId(dynamic v) {
 class BranchDetailModel extends BranchDetail {
   const BranchDetailModel({
     required super.branch,
-    super.branchManager,
+    super.branchManagers = const [],
     required super.products,
   });
 
@@ -22,16 +22,35 @@ class BranchDetailModel extends BranchDetail {
     final branchMap = Map<String, dynamic>.from(json['branch'] as Map);
     final branch = BranchModel.fromJson(branchMap);
 
-    BranchManagerInfo? manager;
-    final rawMgr = json['branchManager'];
-    if (rawMgr is Map<String, dynamic>) {
-      manager = BranchManagerInfo(
-        id: _parseId(rawMgr['_id']),
-        username: rawMgr['username'] as String? ?? '',
-        fullName: rawMgr['fullName'] as String? ?? '',
-        role: rawMgr['role'] as String? ?? '',
-        status: rawMgr['status'] as String? ?? '',
-      );
+    final managers = <BranchManagerInfo>[];
+    final rawList = json['branchManagers'] as List<dynamic>?;
+    if (rawList != null) {
+      for (final e in rawList) {
+        if (e is! Map) continue;
+        final rawMgr = Map<String, dynamic>.from(e);
+        managers.add(
+          BranchManagerInfo(
+            id: _parseId(rawMgr['_id']),
+            username: rawMgr['username'] as String? ?? '',
+            fullName: rawMgr['fullName'] as String? ?? '',
+            role: rawMgr['role'] as String? ?? '',
+            status: rawMgr['status'] as String? ?? '',
+          ),
+        );
+      }
+    } else {
+      final legacy = json['branchManager'];
+      if (legacy is Map<String, dynamic>) {
+        managers.add(
+          BranchManagerInfo(
+            id: _parseId(legacy['_id']),
+            username: legacy['username'] as String? ?? '',
+            fullName: legacy['fullName'] as String? ?? '',
+            role: legacy['role'] as String? ?? '',
+            status: legacy['status'] as String? ?? '',
+          ),
+        );
+      }
     }
 
     final lines = json['inventoryLines'] as List<dynamic>? ?? [];
@@ -61,7 +80,7 @@ class BranchDetailModel extends BranchDetail {
 
     return BranchDetailModel(
       branch: branch,
-      branchManager: manager,
+      branchManagers: managers,
       products: products,
     );
   }

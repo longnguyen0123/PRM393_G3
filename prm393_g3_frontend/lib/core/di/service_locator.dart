@@ -45,6 +45,7 @@ import '../../features/categories/data/repositories/category_repository_impl.dar
 import '../../features/categories/domain/repositories/category_repository.dart';
 import '../../features/categories/domain/usecases/get_categories_usecase.dart';
 import '../../features/categories/presentation/bloc/category_bloc.dart';
+import '../../features/admin_users/data/admin_user_remote_datasource.dart';
 
 final getIt = GetIt.instance;
 
@@ -164,4 +165,8 @@ Future<void> configureDependencies() async {
     ..registerFactory<CategoryBloc>(
       () => CategoryBloc(getCategoriesUseCase: getIt()),
     );
+
+  getIt.registerLazySingleton<AdminUserRemoteDataSource>(
+    () => AdminUserRemoteDataSource(getIt()),
+  );
 }

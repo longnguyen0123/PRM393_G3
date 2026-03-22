@@ -4,6 +4,7 @@
     "name": "Hanoi Branch",
     "address": "Ba Dinh, Hanoi",
     "status": "ACTIVE",
+    "inventoryDelegatedToManager": true,
     "createdAt": "2026-01-01T00:00:00Z"
   },
   {
@@ -11,6 +12,7 @@
     "name": "HCM Branch",
     "address": "District 1, Ho Chi Minh City",
     "status": "ACTIVE",
+    "inventoryDelegatedToManager": true,
     "createdAt": "2026-01-01T00:00:00Z"
   }
 ]

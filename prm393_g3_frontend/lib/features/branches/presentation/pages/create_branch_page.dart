@@ -20,6 +20,7 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
   final _addressController = TextEditingController();
 
   String _status = "ACTIVE";
+  bool _inventoryDelegatedToManager = false;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +114,23 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
                           },
                         ),
 
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text(
+                            'Giao quản lý kho cho Branch Manager',
+                          ),
+                          subtitle: const Text(
+                            'Có thể bật sau trong màn sửa chi nhánh.',
+                          ),
+                          value: _inventoryDelegatedToManager,
+                          onChanged: (v) {
+                            setState(() {
+                              _inventoryDelegatedToManager = v;
+                            });
+                          },
+                        ),
+
                         const SizedBox(height: 24),
 
                         // Submit Button
@@ -127,6 +145,8 @@ class _CreateBranchPageState extends State<CreateBranchPage> {
                                   address: _addressController.text.trim(),
                                   status: _status,
                                   totalItemsInStock: 0,
+                                  inventoryDelegatedToManager:
+                                      _inventoryDelegatedToManager,
                                 );
 
                                 context.read<BranchBloc>().add(

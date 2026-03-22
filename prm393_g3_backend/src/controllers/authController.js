@@ -1,9 +1,7 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import User from '../models/users.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'rcms-jwt-secret-change-in-production';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../models/users.js";
+import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/jwt.js";
 
 export const login = async (req, res, next) => {
   try {
@@ -11,7 +9,7 @@ export const login = async (req, res, next) => {
     if (!username || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Username và password là bắt buộc',
+        message: "Username và password là bắt buộc",
       });
     }
 
@@ -20,14 +18,14 @@ export const login = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Tên đăng nhập hoặc mật khẩu không đúng',
+        message: "Tên đăng nhập hoặc mật khẩu không đúng",
       });
     }
 
-    if (user.status !== 'ACTIVE') {
+    if (user.status !== "ACTIVE") {
       return res.status(403).json({
         success: false,
-        message: 'Tài khoản đã bị vô hiệu hóa',
+        message: "Tài khoản đã bị vô hiệu hóa",
       });
     }
 
@@ -35,7 +33,7 @@ export const login = async (req, res, next) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Tên đăng nhập hoặc mật khẩu không đúng',
+        message: "Tên đăng nhập hoặc mật khẩu không đúng",
       });
     }
 
@@ -43,8 +41,15 @@ export const login = async (req, res, next) => {
     const token = jwt.sign(
       { userId, username: user.username, role: user.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN },
     );
+
+    const managedBranchIds =
+      user.role === "BRANCH_MANAGER"
+        ? (user.managedBranchIds || []).map((x) =>
+            x?.toString?.() ?? String(x),
+          )
+        : null;
 
     res.json({
       success: true,
@@ -56,9 +61,10 @@ export const login = async (req, res, next) => {
           fullName: user.fullName,
           role: user.role,
           branchId: user.branchId?.toString?.() ?? user.branchId ?? null,
+          managedBranchIds,
         },
       },
-      message: 'Đăng nhập thành công',
+      message: "Đăng nhập thành công",
     });
   } catch (err) {
     next(err);

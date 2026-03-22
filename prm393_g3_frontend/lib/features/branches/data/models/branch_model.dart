@@ -7,6 +7,7 @@ class BranchModel extends Branch {
     required super.address,
     required super.status,
     required super.totalItemsInStock,
+    super.inventoryDelegatedToManager = false,
   });
 
   factory BranchModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,8 @@ class BranchModel extends Branch {
       address: json['address'] as String? ?? '',
       status: json['status'] as String? ?? 'ACTIVE',
       totalItemsInStock: (json['totalItemsInStock'] as num?)?.toInt() ?? 0,
+      inventoryDelegatedToManager:
+          json['inventoryDelegatedToManager'] as bool? ?? false,
     );
   }
 }
