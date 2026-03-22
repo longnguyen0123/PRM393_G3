@@ -4,6 +4,47 @@ import '../../../../core/widgets/admin_only_page.dart';
 import '../../../../core/widgets/bottom_nav_bar.dart';
 import '../bloc/variant_bloc.dart';
 import '../../domain/entities/variant.dart';
+import 'create_variant_page.dart';
+import 'edit_variant_page.dart';
+
+Future<void> _openCreateVariantForProduct(
+  BuildContext context, {
+  required String productId,
+  required String productName,
+}) async {
+  final result = await Navigator.of(context).push<String>(
+    MaterialPageRoute(
+      builder: (_) => CreateVariantPage(
+        productId: productId,
+        productName: productName,
+      ),
+    ),
+  );
+  if (!context.mounted || result != 'created') {
+    return;
+  }
+  context.read<VariantBloc>().add(VariantRefreshed(productId));
+}
+
+Future<void> _openEditVariantForProduct(
+  BuildContext context, {
+  required String productId,
+  required String productName,
+  required Variant variant,
+}) async {
+  final result = await Navigator.of(context).push<String>(
+    MaterialPageRoute(
+      builder: (_) => EditVariantPage(
+        productName: productName,
+        variant: variant,
+      ),
+    ),
+  );
+  if (!context.mounted || result != 'updated') {
+    return;
+  }
+  context.read<VariantBloc>().add(VariantRefreshed(productId));
+}
 
 class VariantListPage extends StatelessWidget {
   const VariantListPage({super.key, required this.productId, required this.productName});
@@ -48,9 +89,11 @@ class VariantListPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black),
-            onPressed: () {
-              // TODO: Implement add variant functionality
-            },
+            onPressed: () => _openCreateVariantForProduct(
+              context,
+              productId: productId,
+              productName: productName,
+            ),
           ),
         ],
       ),
@@ -81,9 +124,21 @@ class VariantListPage extends StatelessWidget {
                   },
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 120),
-                      Center(child: Text('No variants found')),
+                    children: [
+                      const SizedBox(height: 80),
+                      const Center(child: Text('No variants found')),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: FilledButton.icon(
+                          onPressed: () => _openCreateVariantForProduct(
+                            context,
+                            productId: productId,
+                            productName: productName,
+                          ),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add variant'),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -103,7 +158,9 @@ class VariantListPage extends StatelessWidget {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                     ),
-                    ...state.variants.map((variant) => _buildVariantCard(variant)),
+                    ...state.variants.map(
+                      (variant) => _buildVariantCard(context, variant),
+                    ),
                   ],
                 ),
               );
@@ -117,7 +174,7 @@ class VariantListPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVariantCard(Variant variant) {
+  Widget _buildVariantCard(BuildContext context, Variant variant) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -129,9 +186,30 @@ class VariantListPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            variant.variantName ?? variant.sku,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  variant.variantName ?? variant.sku,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: Colors.black87),
+                tooltip: 'Edit variant',
+                onPressed: () => _openEditVariantForProduct(
+                  context,
+                  productId: productId,
+                  productName: productName,
+                  variant: variant,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           _buildVariantInfoRow('SKU:', variant.sku),

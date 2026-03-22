@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 
 const variantSchema = new mongoose.Schema(
   {
-    // align with existing data: often productId is a string code like 'product_001'
-    productId: { type: String, required: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product', required: true },
     sku: { type: String, required: true, unique: true },
     barcode: { type: String, unique: true },
     price: { type: Number, required: true },
